@@ -37,14 +37,10 @@ public class RewardServiceImpl implements RewardService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void addStars(Long userId, int count, Integer sourceType, Long sourceId) {
-        // 更新用户星星总数
-        SysUser user = userMapper.selectById(userId);
-        if (user != null) {
-            user.setStarCount(user.getStarCount() + count);
-            userMapper.updateById(user);
-        }
+        // 使用原子更新避免并发竞态（SQL: UPDATE SET star_count = star_count + count）
+        userMapper.addStars(userId, count);
 
         // 记录星星奖励
         RewardRecord record = new RewardRecord();

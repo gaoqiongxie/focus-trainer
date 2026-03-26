@@ -33,7 +33,7 @@ mybatis-plus:
 
 # JWT配置
 jwt:
-  secret: focuskids2026secretkeyfortrainerapp
+  secret: ${JWT_SECRET:FkTr2026#Sec!K3y$F0cusKidsApp}
   expiration: 604800000  # 7天(毫秒)
   header: Authorization
   prefix: Bearer

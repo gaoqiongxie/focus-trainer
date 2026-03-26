@@ -76,7 +76,7 @@ public class TrainingServiceImpl implements TrainingService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public TrainingRecord completeTraining(Long recordId, Integer actualDuration, Integer interruptCount,
                                             Double accuracy, Integer score) {
         TrainingRecord record = recordMapper.selectById(recordId);
@@ -102,7 +102,7 @@ public class TrainingServiceImpl implements TrainingService {
 
         recordMapper.updateById(record);
 
-        // 发放星星奖励
+        // 发放星星奖励（通过注入的代理对象调用，确保事务生效）
         if (starReward > 0) {
             rewardService.addStars(record.getUserId(), starReward, 1, recordId);
         }

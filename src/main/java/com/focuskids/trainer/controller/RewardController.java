@@ -60,9 +60,9 @@ public class RewardController {
     }
 
     @PostMapping("/notification/read")
-    public R<Void> markRead(@RequestBody Map<String, Object> params) {
+    public R<Void> markRead(HttpServletRequest request, @RequestBody Map<String, Object> params) {
         Long notificationId = Long.valueOf(params.get("notificationId").toString());
-        Long userId = Long.valueOf(params.get("userId").toString());
+        Long userId = (Long) request.getAttribute("userId");
         notificationService.markRead(notificationId, userId);
         return R.success();
     }
