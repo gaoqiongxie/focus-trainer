@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.focuskids.trainer.mapper.TrainingRecordMapper">
+
+    <select id="selectTrainingStatistics" resultType="java.util.Map">
+        SELECT
+            COUNT(*) AS totalCount,
+            IFNULL(SUM(CASE WHEN status = 1 THEN 1 ELSE 0 END), 0) AS completedCount,
+            IFNULL(SUM(actual_duration), 0) AS totalDuration,
+            IFNULL(AVG(accuracy), 0) AS avgAccuracy,
+            IFNULL(SUM(star_reward), 0) AS totalStars
+        FROM training_record
+        WHERE user_id = #{userId}
+          AND start_time BETWEEN #{startTime} AND #{endTime}
+    </select>
+
+    <select id="selectRecentRecords" resultType="com.focuskids.trainer.entity.TrainingRecord">
+        SELECT * FROM training_record
+        WHERE user_id = #{userId}
+        ORDER BY start_time DESC
+        LIMIT #{limit}
+    </select>
+
+</mapper>
