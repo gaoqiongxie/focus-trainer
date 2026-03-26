@@ -140,18 +140,42 @@ CREATE TABLE IF NOT EXISTS notification (
 
 -- ----------------------------
 -- 初始化训练配置数据
+-- training_type说明:
+--   1=专注时长, 2=视觉追踪, 3=听觉专注, 4=记忆训练
+--   21=数字闪现(视觉追踪子类), 22=舒尔特方格(视觉追踪子类)
+--   41=卡片配对(记忆训练子类)
+-- level: 同类型内的难度等级
+-- config_json: 各游戏详细配置
 -- ----------------------------
-INSERT INTO training_config (training_type, training_name, level, duration, description, is_active) VALUES
-(1, '专注时长-入门', 1, 300,  '5分钟专注训练，适合初学者', 1),
-(1, '专注时长-进阶', 2, 600,  '10分钟专注训练', 1),
-(1, '专注时长-标准', 3, 900,  '15分钟专注训练', 1),
-(1, '专注时长-强化', 4, 1200, '20分钟专注训练', 1),
-(1, '专注时长-挑战', 5, 1800, '30分钟专注训练，挑战模式', 1),
-(2, '视觉追踪-初级', 1, 300,  '3x3舒尔特方格，初级难度', 1),
-(2, '视觉追踪-中级', 2, 300,  '4x4舒尔特方格，中级难度', 1),
-(2, '视觉追踪-高级', 3, 300,  '5x5舒尔特方格，高级难度', 1),
-(3, '听觉专注-初级', 1, 300,  '简单声音识别训练', 1),
-(3, '听觉专注-中级', 2, 300,  '干扰环境声音识别', 1),
-(4, '记忆训练-初级', 1, 300,  '数字记忆，序列长度3-5', 1),
-(4, '记忆训练-中级', 2, 300,  '图形记忆，序列长度5-7', 1),
-(4, '记忆训练-高级', 3, 300,  '混合记忆，序列长度7-10', 1);
+
+-- 1. 专注时长训练（原有，保持不变）
+INSERT INTO training_config (training_type, training_name, level, duration, config_json, description, is_active) VALUES
+(1, '专注时长-入门', 1, 300,  '{"mode":"countdown","starPerMinute":2}',  '5分钟专注训练，适合初学者', 1),
+(1, '专注时长-进阶', 2, 600,  '{"mode":"countdown","starPerMinute":2}',  '10分钟专注训练', 1),
+(1, '专注时长-标准', 3, 900,  '{"mode":"countdown","starPerMinute":2}',  '15分钟专注训练', 1),
+(1, '专注时长-强化', 4, 1200, '{"mode":"countdown","starPerMinute":3}',  '20分钟专注训练', 1),
+(1, '专注时长-挑战', 5, 1800, '{"mode":"countdown","starPerMinute":3}',  '30分钟专注训练，挑战模式', 1);
+
+-- 2. 舒尔特方格（视觉追踪子类）
+INSERT INTO training_config (training_type, training_name, level, duration, config_json, description, is_active) VALUES
+(2, '舒尔特方格-初级', 1, 300, '{"game":"schulte","gridSize":3,"standardTime":15,"scoring":{"perfect":21,"good":9,"base":3}}', '3×3方格，9个数字', 1),
+(2, '舒尔特方格-中级', 2, 300, '{"game":"schulte","gridSize":4,"standardTime":40,"scoring":{"perfect":40,"good":20,"base":5}}', '4×4方格，16个数字', 1),
+(2, '舒尔特方格-高级', 3, 300, '{"game":"schulte","gridSize":5,"standardTime":75,"scoring":{"perfect":75,"good":35,"base":8}}', '5×5方格，25个数字', 1);
+
+-- 3. 数字闪现训练（视觉追踪子类）
+INSERT INTO training_config (training_type, training_name, level, duration, config_json, description, is_active) VALUES
+(21, '数字闪现-初级', 1, 300, '{"game":"flash","digits":3,"displayMs":2000,"rounds":5,"scorePerRound":10}', '3位数，2秒闪现，5轮', 1),
+(21, '数字闪现-中级', 2, 300, '{"game":"flash","digits":4,"displayMs":1500,"rounds":7,"scorePerRound":10}', '4位数，1.5秒闪现，7轮', 1),
+(21, '数字闪现-高级', 3, 300, '{"game":"flash","digits":5,"displayMs":1000,"rounds":10,"scorePerRound":10}', '5位数，1秒闪现，10轮', 1);
+
+-- 4. 听觉专注-声音序列记忆
+INSERT INTO training_config (training_type, training_name, level, duration, config_json, description, is_active) VALUES
+(3, '声音序列-初级', 1, 300, '{"game":"sound_sequence","seqLength":3,"rounds":5,"animals":8,"scorePerRound":30}', '3个声音序列，5轮', 1),
+(3, '声音序列-中级', 2, 300, '{"game":"sound_sequence","seqLength":5,"rounds":5,"animals":8,"scorePerRound":50}', '5个声音序列，5轮', 1),
+(3, '声音序列-高级', 3, 300, '{"game":"sound_sequence","seqLength":7,"rounds":5,"animals":8,"scorePerRound":70}', '7个声音序列，5轮', 1);
+
+-- 5. 卡片配对记忆（记忆训练子类）
+INSERT INTO training_config (training_type, training_name, level, duration, config_json, description, is_active) VALUES
+(4, '卡片配对-初级', 1, 300, '{"game":"card_match","pairs":6,"gridColumns":4,"scoreBase":100}', '6对卡片，4×3布局', 1),
+(4, '卡片配对-中级', 2, 300, '{"game":"card_match","pairs":8,"gridColumns":4,"scoreBase":100}', '8对卡片，4×4布局', 1),
+(4, '卡片配对-高级', 3, 300, '{"game":"card_match","pairs":10,"gridColumns":5,"scoreBase":100}', '10对卡片，5×4布局', 1);
