@@ -34,7 +34,7 @@ mybatis-plus:
 # JWT配置
 jwt:
   secret: ${JWT_SECRET:FkTr2026#Sec!K3y$F0cusKidsApp}
-  expiration: 604800000  # 7天(毫秒)
+  expiration: 86400000  # 24小时(毫秒)
   header: Authorization
   prefix: Bearer
 

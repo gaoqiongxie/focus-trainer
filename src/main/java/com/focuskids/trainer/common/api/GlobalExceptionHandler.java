@@ -1,5 +1,7 @@
 package com.focuskids.trainer.common.api;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -12,6 +14,8 @@ import javax.servlet.http.HttpServletRequest;
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(BusinessException.class)
     public R<Void> handleBusinessException(BusinessException e, HttpServletRequest request) {
@@ -37,7 +41,8 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public R<Void> handleException(Exception e) {
+    public R<Void> handleException(Exception e, HttpServletRequest request) {
+        log.error("系统异常 URI={} {}", request.getRequestURI(), e.getMessage(), e);
         return R.error(500, "系统繁忙，请稍后重试");
     }
 }

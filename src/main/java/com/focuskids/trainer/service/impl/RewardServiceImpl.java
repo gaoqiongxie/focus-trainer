@@ -93,7 +93,7 @@ public class RewardServiceImpl implements RewardService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public UserStreak updateStreak(Long userId) {
         LocalDate today = LocalDate.now();
 

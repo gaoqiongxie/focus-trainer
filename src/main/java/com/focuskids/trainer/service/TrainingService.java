@@ -24,13 +24,13 @@ public interface TrainingService {
     /**
      * 完成训练
      */
-    TrainingRecord completeTraining(Long recordId, Integer actualDuration, Integer interruptCount,
+    TrainingRecord completeTraining(Long userId, Long recordId, Integer actualDuration, Integer interruptCount,
                                      Double accuracy, Integer score);
 
     /**
      * 中断训练
      */
-    void interruptTraining(Long recordId);
+    void interruptTraining(Long userId, Long recordId);
 
     /**
      * 获取训练统计

@@ -42,7 +42,7 @@ public class EvaluationServiceImpl implements EvaluationService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public UserAbility generateEvaluation(Long userId) {
         LocalDateTime startTime = LocalDate.now().minusDays(7).atStartOfDay();
         LocalDateTime endTime = LocalDateTime.now();
@@ -115,12 +115,12 @@ public class EvaluationServiceImpl implements EvaluationService {
                .between(TrainingRecord::getStartTime, start, end);
 
         List<TrainingRecord> records = recordMapper.selectList(wrapper);
-        if (records.isEmpty()) return 50.0; // 无数据时给50分（基础分）
+        if (records.isEmpty()) return 0.0; // 无数据时给0分，不虚高
 
         double avg = records.stream()
                 .filter(r -> r.getAccuracy() != null)
                 .mapToDouble(r -> r.getAccuracy().doubleValue())
-                .average().orElse(50.0);
+                .average().orElse(0.0);
         return Math.min(100, avg);
     }
 

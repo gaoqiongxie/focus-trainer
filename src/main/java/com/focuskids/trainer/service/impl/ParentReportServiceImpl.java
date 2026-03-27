@@ -77,11 +77,11 @@ public class ParentReportServiceImpl implements ParentReportService {
 
         // 获取儿童信息
         SysUser child = userMapper.selectById(targetChildId);
-        result.put("child", Map.of(
-            "userId", targetChildId,
-            "nickname", child != null ? child.getNickname() : "",
-            "avatar", child != null ? (child.getAvatar() != null ? child.getAvatar() : "") : ""
-        ));
+        Map<String, Object> childInfo = new HashMap<>();
+        childInfo.put("userId", targetChildId);
+        childInfo.put("nickname", child != null ? child.getNickname() : "");
+        childInfo.put("avatar", child != null ? (child.getAvatar() != null ? child.getAvatar() : "") : "");
+        result.put("child", childInfo);
 
         return result;
     }
@@ -128,15 +128,15 @@ public class ParentReportServiceImpl implements ParentReportService {
 
         // 雷达图数据（5个维度）
         List<Map<String, Object>> radarData = new ArrayList<>();
-        radarData.add(Map.of("dimension", "专注时长", "score", parseScore(focusScore.get("avgAccuracy"))));
-        radarData.add(Map.of("dimension", "视觉追踪", "score", parseScore(visualScore.get("avgAccuracy"))));
-        radarData.add(Map.of("dimension", "听觉专注", "score", parseScore(auditoryScore.get("avgAccuracy"))));
-        radarData.add(Map.of("dimension", "工作记忆", "score", parseScore(memoryScore.get("avgAccuracy"))));
+        radarData.add(createRadarItem("专注时长", parseScore(focusScore.get("avgAccuracy"))));
+        radarData.add(createRadarItem("视觉追踪", parseScore(visualScore.get("avgAccuracy"))));
+        radarData.add(createRadarItem("听觉专注", parseScore(auditoryScore.get("avgAccuracy"))));
+        radarData.add(createRadarItem("工作记忆", parseScore(memoryScore.get("avgAccuracy"))));
 
         // 抑制控制 = 1 - 中断率
         double interruptRate = calcInterruptRate(targetChildId, weekStart, today.atTime(LocalTime.MAX));
         double inhibitoryScore = Math.max(0, (1 - interruptRate) * 100);
-        radarData.add(Map.of("dimension", "抑制控制", "score", Math.round(inhibitoryScore)));
+        radarData.add(createRadarItem("抑制控制", Math.round(inhibitoryScore)));
 
         result.put("radarData", radarData);
 
@@ -174,6 +174,11 @@ public class ParentReportServiceImpl implements ParentReportService {
     public Map<String, Object> getDetailedRecords(Long parentUserId, Long childId,
                                                    Integer trainingType, int page, int size) {
         Long targetChildId = resolveChildId(parentUserId, childId);
+
+        // 分页参数校验
+        if (page < 1) page = 1;
+        if (size < 1) size = 20;
+        if (size > 100) size = 100;
 
         LambdaQueryWrapper<TrainingRecord> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(TrainingRecord::getUserId, targetChildId);
@@ -307,8 +312,8 @@ public class ParentReportServiceImpl implements ParentReportService {
             return defaultChild.getUserId();
         }
 
-        // 如果没有绑定儿童，返回自己的ID（兼容测试）
-        return parentUserId;
+        // 如果没有绑定儿童，返回错误
+        throw new BusinessException(ErrorCode.USER_NOT_FOUND);
     }
 
     /**
@@ -516,5 +521,12 @@ public class ParentReportServiceImpl implements ParentReportService {
     private String getWeekdayName(LocalDate date) {
         String[] names = {"", "周一", "周二", "周三", "周四", "周五", "周六", "周日"};
         return names[date.getDayOfWeek().getValue()];
+    }
+
+    private Map<String, Object> createRadarItem(String dimension, double score) {
+        Map<String, Object> item = new HashMap<>();
+        item.put("dimension", dimension);
+        item.put("score", score);
+        return item;
     }
 }

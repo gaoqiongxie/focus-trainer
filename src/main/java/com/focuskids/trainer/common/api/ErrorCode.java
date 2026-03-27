@@ -25,6 +25,7 @@ public enum ErrorCode {
     TRAINING_IN_PROGRESS(2002, "已有进行中的训练"),
     TRAINING_CONFIG_ERROR(2003, "训练配置不存在"),
     TRAINING_DURATION_ERROR(2004, "训练时长不合法"),
+    TRAINING_ALREADY_COMPLETED(2005, "训练已完成或已中断，无法重复操作"),
 
     // 评估相关 3001-3099
     EVALUATION_NOT_FOUND(3001, "评估记录不存在"),

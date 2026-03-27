@@ -77,16 +77,28 @@ public class TrainingServiceImpl implements TrainingService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public TrainingRecord completeTraining(Long recordId, Integer actualDuration, Integer interruptCount,
+    public TrainingRecord completeTraining(Long userId, Long recordId, Integer actualDuration, Integer interruptCount,
                                             Double accuracy, Integer score) {
         TrainingRecord record = recordMapper.selectById(recordId);
         if (record == null) {
             throw new BusinessException(ErrorCode.TRAINING_NOT_FOUND);
         }
 
+        // 校验权属：只能完成自己的训练记录
+        if (!userId.equals(record.getUserId())) {
+            throw new BusinessException(ErrorCode.FORBIDDEN);
+        }
+
+        // 校验训练状态：只能完成"进行中"的训练
+        if (record.getStatus() != 0) {
+            throw new BusinessException(ErrorCode.TRAINING_ALREADY_COMPLETED);
+        }
+
         record.setActualDuration(actualDuration);
         record.setInterruptCount(interruptCount);
-        record.setAccuracy(BigDecimal.valueOf(accuracy).setScale(2, RoundingMode.HALF_UP));
+        record.setAccuracy(accuracy != null
+                ? BigDecimal.valueOf(accuracy).setScale(2, RoundingMode.HALF_UP)
+                : null);
         record.setScore(score);
         record.setStatus(1);
         record.setEndTime(LocalDateTime.now());
@@ -111,11 +123,21 @@ public class TrainingServiceImpl implements TrainingService {
     }
 
     @Override
-    @Transactional
-    public void interruptTraining(Long recordId) {
+    @Transactional(rollbackFor = Exception.class)
+    public void interruptTraining(Long userId, Long recordId) {
         TrainingRecord record = recordMapper.selectById(recordId);
         if (record == null) {
             throw new BusinessException(ErrorCode.TRAINING_NOT_FOUND);
+        }
+
+        // 校验权属：只能中断自己的训练记录
+        if (!userId.equals(record.getUserId())) {
+            throw new BusinessException(ErrorCode.FORBIDDEN);
+        }
+
+        // 校验训练状态：只能中断"进行中"的训练
+        if (record.getStatus() != 0) {
+            return;
         }
 
         record.setStatus(2);

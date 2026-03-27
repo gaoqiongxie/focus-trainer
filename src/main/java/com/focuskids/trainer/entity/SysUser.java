@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -35,6 +36,7 @@ public class SysUser implements Serializable {
     private String phone;
 
     /** 密码(BCrypt加密) */
+    @JsonIgnore
     private String password;
 
     /** 年龄 */

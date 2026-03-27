@@ -5,8 +5,7 @@ import com.focuskids.trainer.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
 /**
@@ -36,7 +35,8 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public R<Void> logout() {
+    public R<Void> logout(HttpServletRequest request) {
+        // TODO: 从Redis清除token，强制失效
         return R.success();
     }
 
@@ -47,8 +47,9 @@ public class AuthController {
     }
 
     @PostMapping("/child-bind")
-    public R<Void> bindChild(@RequestBody Map<String, Object> params) {
-        Long parentId = Long.valueOf(params.get("parentId").toString());
+    public R<Void> bindChild(HttpServletRequest request, @RequestBody Map<String, Object> params) {
+        // 从JWT中获取当前登录用户ID，防止IDOR漏洞
+        Long parentId = (Long) request.getAttribute("userId");
         Long childId = Long.valueOf(params.get("childId").toString());
         authService.bindChild(parentId, childId);
         return R.success();

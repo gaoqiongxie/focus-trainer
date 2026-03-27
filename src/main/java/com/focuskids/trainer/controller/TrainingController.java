@@ -36,19 +36,21 @@ public class TrainingController {
     }
 
     @PostMapping("/complete")
-    public R<TrainingRecord> completeTraining(@RequestBody Map<String, Object> params) {
+    public R<TrainingRecord> completeTraining(HttpServletRequest request, @RequestBody Map<String, Object> params) {
+        Long userId = (Long) request.getAttribute("userId");
         Long recordId = Long.valueOf(params.get("recordId").toString());
         Integer actualDuration = (Integer) params.get("actualDuration");
         Integer interruptCount = params.get("interruptCount") != null ? (Integer) params.get("interruptCount") : 0;
         Double accuracy = params.get("accuracy") != null ? ((Number) params.get("accuracy")).doubleValue() : null;
         Integer score = params.get("score") != null ? (Integer) params.get("score") : 0;
-        return R.success(trainingService.completeTraining(recordId, actualDuration, interruptCount, accuracy, score));
+        return R.success(trainingService.completeTraining(userId, recordId, actualDuration, interruptCount, accuracy, score));
     }
 
     @PostMapping("/interrupt")
-    public R<Void> interruptTraining(@RequestBody Map<String, Object> params) {
+    public R<Void> interruptTraining(HttpServletRequest request, @RequestBody Map<String, Object> params) {
+        Long userId = (Long) request.getAttribute("userId");
         Long recordId = Long.valueOf(params.get("recordId").toString());
-        trainingService.interruptTraining(recordId);
+        trainingService.interruptTraining(userId, recordId);
         return R.success();
     }
 
