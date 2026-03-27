@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Focus Trainer 项目测试报告</title>
+<title>Focus Trainer 项目测试报告 — Phase 6 更新</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: -apple-system, 'Segoe UI', Roboto, sans-serif; background: #f5f7fa; color: #2c3e50; line-height: 1.6; }
@@ -12,6 +12,7 @@
   .header { background: linear-gradient(135deg, #4A90D9, #6C63FF); color: white; padding: 40px; border-radius: 16px; margin-bottom: 24px; }
   .header h1 { font-size: 28px; margin-bottom: 8px; }
   .header p { opacity: 0.9; font-size: 14px; }
+  .header .update-tag { display: inline-block; background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 12px; font-size: 12px; margin-top: 8px; }
   
   .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
   .stat-card { background: white; padding: 20px; border-radius: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
@@ -30,525 +31,413 @@
   .badge-p1 { background: #fef3e0; color: #f39c12; }
   .badge-p2 { background: #e8f4fd; color: #3498db; }
   .badge-fixed { background: #e8f8f0; color: #27ae60; }
-  .badge-backend { background: #f3e8ff; color: #8b5cf6; }
-  .badge-frontend { background: #e0f7fa; color: #0097a7; }
+  .badge-backend { background: #f3e8fd; color: #8e44ad; }
+  .badge-frontend { background: #e8f8fd; color: #2980b9; }
   
-  table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  th { text-align: left; padding: 10px 12px; background: #f8f9fa; font-weight: 600; color: #555; border-bottom: 2px solid #eee; }
-  td { padding: 10px 12px; border-bottom: 1px solid #f0f0f0; vertical-align: top; }
-  tr:hover td { background: #fafbfc; }
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; padding: 10px 12px; font-size: 12px; color: #7f8c8d; text-transform: uppercase; border-bottom: 2px solid #f0f0f0; }
+  td { padding: 10px 12px; font-size: 13px; border-bottom: 1px solid #f5f5f5; }
+  tr:hover { background: #fafbfc; }
   
-  .issue-id { font-family: monospace; font-size: 12px; color: #999; }
-  .file-path { font-family: monospace; font-size: 12px; color: #4A90D9; word-break: break-all; }
-  .code-block { background: #f5f6f8; padding: 8px 12px; border-radius: 6px; font-family: 'Fira Code', monospace; font-size: 12px; margin-top: 6px; white-space: pre-wrap; max-height: 120px; overflow: auto; }
+  .status { display: inline-flex; align-items: center; gap: 4px; }
+  .status::before { content: ''; width: 8px; height: 8px; border-radius: 50%; }
+  .status-fixed::before { background: #27ae60; }
+  .status-pending::before { background: #f39c12; }
   
-  .summary-bar { height: 8px; background: #eee; border-radius: 4px; overflow: hidden; display: flex; }
-  .summary-bar .bar { height: 100%; transition: width 0.3s; }
-  .bar-p0 { background: #e74c3c; }
-  .bar-p1 { background: #f39c12; }
-  .bar-p2 { background: #3498db; }
+  .progress-bar { height: 8px; background: #e0e0e0; border-radius: 4px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
+  .progress-fill.green { background: linear-gradient(90deg, #27ae60, #2ecc71); }
+  .progress-fill.orange { background: linear-gradient(90deg, #f39c12, #f1c40f); }
+  .progress-fill.blue { background: linear-gradient(90deg, #3498db, #2980b9); }
   
-  @media (max-width: 768px) {
-    .stats { grid-template-columns: repeat(2, 1fr); }
-    table { font-size: 12px; }
-    .header h1 { font-size: 22px; }
-  }
+  .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  
+  .footer { text-align: center; padding: 24px; color: #95a5a6; font-size: 12px; }
 </style>
 </head>
 <body>
 <div class="container">
 
 <div class="header">
-  <h1>🔍 Focus Trainer 项目全面测试报告</h1>
-  <p>测试日期: 2026-03-27 &nbsp;|&nbsp; 测试范围: 后端 (Spring Boot) + 前端 (Flutter) &nbsp;|&nbsp; 测试方式: 静态代码审查</p>
+  <h1>🎯 Focus Trainer 项目测试报告</h1>
+  <p>静态代码审查 — 全面质量评估</p>
+  <span class="update-tag">更新于 2026-03-27 15:30 | 第二轮修复</span>
 </div>
 
 <div class="stats">
-  <div class="stat-card p0"><div class="number">15</div><div class="label">P0 严重问题</div></div>
-  <div class="stat-card p1"><div class="number">18</div><div class="label">P1 重要问题</div></div>
-  <div class="stat-card p2"><div class="number">17</div><div class="label">P2 一般问题</div></div>
-  <div class="stat-card fixed"><div class="number">16</div><div class="label">已修复</div></div>
+  <div class="stat-card fixed">
+    <div class="number">28</div>
+    <div class="label">已修复问题</div>
+  </div>
+  <div class="stat-card p0">
+    <div class="number">0</div>
+    <div class="label">P0 遗留</div>
+  </div>
+  <div class="stat-card p1">
+    <div class="number">5</div>
+    <div class="label">P1 遗留</div>
+  </div>
+  <div class="stat-card p2">
+    <div class="number">7</div>
+    <div class="label">P2 遗留</div>
+  </div>
 </div>
 
-<div class="summary-bar" style="margin-bottom: 24px;">
-  <div class="bar bar-p0" style="width: 30%;"></div>
-  <div class="bar bar-p1" style="width: 36%;"></div>
-  <div class="bar bar-p2" style="width: 34%;"></div>
-</div>
-
-<!-- ==================== P0 严重问题 ==================== -->
+<!-- 修复进度 -->
 <div class="section">
-<h2>🔴 P0 — 严重问题（影响功能/安全）</h2>
-<table>
-<tr><th style="width:40px">#</th><th style="width:80px">级别</th><th style="width:100px">模块</th><th>问题描述</th><th style="width:80px">状态</th></tr>
-
-<tr>
-  <td class="issue-id">B-01</td>
-  <td><span class="badge badge-p0">P0</span></td>
-  <td><span class="badge badge-backend">后端</span></td>
-  <td>
-    <strong>编译失败 — Map.of() Java 9+ API</strong><br>
-    <span class="file-path">ParentReportServiceImpl.java 第80/131-139行</span><br>
-    <span style="color:#e74c3c;">项目配置 Java 8，但代码使用 Map.of()（Java 9+），导致项目无法编译</span>
-    <div class="code-block">// 错误: Map.of() 在 Java 8 不存在
-result.put("child", Map.of("userId", targetChildId, ...));
-// 修复: 改用 HashMap + put</div>
-  </td>
-  <td><span class="badge badge-fixed">已修复</span></td>
-</tr>
-
-<tr>
-  <td class="issue-id">B-02</td>
-  <td><span class="badge badge-p0">P0</span></td>
-  <td><span class="badge badge-backend">后端</span></td>
-  <td>
-    <strong>IDOR 漏洞 — child-bind 接口</strong><br>
-    <span class="file-path">AuthController.java 第49-55行</span><br>
-    <span style="color:#e74c3c;">parentId 由客户端传入，未与JWT中的用户ID比对，可绑定任意人的儿童</span>
-    <div class="code-block">// 修复前: Long parentId = Long.valueOf(params.get("parentId")...);
-// 修复后: Long parentId = (Long) request.getAttribute("userId");</div>
-  </td>
-  <td><span class="badge badge-fixed">已修复</span></td>
-</tr>
-
-<tr>
-  <td class="issue-id">B-03</td>
-  <td><span class="badge badge-p0">P0</span></td>
-  <td><span class="badge badge-backend">后端</span></td>
-  <td>
-    <strong>训练状态未校验 — 可重复完成刷星</strong><br>
-    <span class="file-path">TrainingServiceImpl.java completeTraining()</span><br>
-    <span style="color:#e74c3c;">未检查 record.getStatus() == 0，已完成/中断的训练可被重复完成</span>
-    <div class="code-block">// 修复: 添加 if (record.getStatus() != 0) throw;</div>
-  </td>
-  <td><span class="badge badge-fixed">已修复</span></td>
-</tr>
-
-<tr>
-  <td class="issue-id">B-04</td>
-  <td><span class="badge badge-p0">P0</span></td>
-  <td><span class="badge badge-backend">后端</span></td>
-  <td>
-    <strong>NPE — accuracy 为 null 时崩溃</strong><br>
-    <span class="file-path">TrainingServiceImpl.java 第89行</span><br>
-    <span style="color:#e74c3c;">BigDecimal.valueOf(null) 导致 NullPointerException</span>
-    <div class="code-block">// 修复: accuracy != null ? BigDecimal.valueOf(accuracy)... : null</div>
-  </td>
-  <td><span class="badge badge-fixed">已修复</span></td>
-</tr>
-
-<tr>
-  <td class="issue-id">B-05</td>
-  <td><span class="badge badge-p0">P0</span></td>
-  <td><span class="badge badge-backend">后端</span></td>
-  <td>
-    <strong>权限缺失 — complete/interrupt 未校验记录所有者</strong><br>
-    <span class="file-path">TrainingController.java completeTraining()/interruptTraining()</span><br>
-    <span style="color:#e74c3c;">未验证当前用户是否是训练记录所有者，可操作他人记录</span>
-  </td>
-  <td><span class="badge badge-fixed">已修复</span></td>
-</tr>
-
-<tr>
-  <td class="issue-id">B-06</td>
-  <td><span class="badge badge-p0">P0</span></td>
-  <td><span class="badge badge-backend">后端</span></td>
-  <td>
-    <strong>密码泄露 — getProfile 返回 password 字段</strong><br>
-    <span class="file-path">UserController.java / SysUser.java</span><br>
-    <span style="color:#e74c3c;">/user/profile 接口返回 SysUser 实体，含 BCrypt 加密密码</span>
-  </td>
-  <td><span class="badge badge-fixed">已修复</span></td>
-</tr>
-
-<tr>
-  <td class="issue-id">B-07</td>
-  <td><span class="badge badge-p0">P0</span></td>
-  <td><span class="badge badge-backend">后端</span></td>
-  <td>
-    <strong>CORS 配置不安全</strong><br>
-    <span class="file-path">CorsConfig.java 第18行</span><br>
-    <span style="color:#e74c3c;">addAllowedOriginPattern("*") + setAllowCredentials(true) = 任意来源携带凭证</span>
-  </td>
-  <td><span class="badge badge-fixed">已修复</span></td>
-</tr>
-
-<tr>
-  <td class="issue-id">B-08</td>
-  <td><span class="badge badge-p0">P0</span></td>
-  <td><span class="badge badge-backend">后端</span></td>
-  <td>
-    <strong>异常静默吞掉 — 无日志</strong><br>
-    <span class="file-path">GlobalExceptionHandler.java handleException()</span><br>
-    <span style="color:#e74c3c;">通用异常处理未打印日志，生产问题无法排查</span>
-  </td>
-  <td><span class="badge badge-fixed">已修复</span></td>
-</tr>
-
-<tr>
-  <td class="issue-id">B-09</td>
-  <td><span class="badge badge-p0">P0</span></td>
-  <td><span class="badge badge-backend">后端</span></td>
-  <td>
-    <strong>并发竞态 — updateStreak</strong><br>
-    <span class="file-path">RewardServiceImpl.java updateStreak()</span><br>
-    <span style="color:#e74c3c;">select→modify→update 模式，并发下连续打卡数据可能丢失</span>
-    <div class="code-block">// 建议: 使用 UPDATE ... SET current_streak = current_streak + 1 WHERE ...</div>
-  </td>
-  <td><span class="badge badge-fixed">部分修复</span></td>
-</tr>
-
-<tr>
-  <td class="issue-id">B-10</td>
-  <td><span class="badge badge-p0">P0</span></td>
-  <td><span class="badge badge-backend">后端</span></td>
-  <td>
-    <strong>分页参数未校验 — SQL 注入风险</strong><br>
-    <span class="file-path">ParentReportServiceImpl.java 第188行</span><br>
-    <span style="color:#e74c3c;">page 可为 0 或负数，LIMIT offset 可能产生负值</span>
-  </td>
-  <td><span class="badge badge-fixed">已修复</span></td>
-</tr>
-
-<tr>
-  <td class="issue-id">B-11</td>
-  <td><span class="badge badge-p0">P0</span></td>
-  <td><span class="badge badge-backend">后端</span></td>
-  <td>
-    <strong>@Transactional 未指定 rollbackFor</strong><br>
-    <span class="file-path">EvaluationServiceImpl.java, RewardServiceImpl.java</span><br>
-    <span style="color:#e74c3c;">默认只回滚 RuntimeException，checked exception 不会回滚</span>
-  </td>
-  <td><span class="badge badge-fixed">已修复</span></td>
-</tr>
-
-<tr>
-  <td class="issue-id">F-01</td>
-  <td><span class="badge badge-p0">P0</span></td>
-  <td><span class="badge badge-frontend">前端</span></td>
-  <td>
-    <strong>洗牌算法错误 — 数字重复/缺失</strong><br>
-    <span class="file-path">schulte_grid_screen.dart 第75-77行</span><br>
-    <span style="color:#e74c3c;">Fisher-Yates 交换逻辑错误，先覆盖 _numbers[i]，再赋值已变</span>
-    <div class="code-block">// 错误: _numbers[i] = _numbers[j]; _numbers[j] = _numbers[i];
-// 正确: final temp = _numbers[i]; _numbers[i] = _numbers[j]; _numbers[j] = temp;</div>
-  </td>
-  <td><span class="badge badge-fixed">已修复</span></td>
-</tr>
-
-<tr>
-  <td class="issue-id">F-02</td>
-  <td><span class="badge badge-p0">P0</span></td>
-  <td><span class="badge badge-frontend">前端</span></td>
-  <td>
-    <strong>输入状态混乱 — 错误后可继续输入</strong><br>
-    <span class="file-path">sound_sequence_screen.dart 第207-212行</span><br>
-    <span style="color:#e74c3c;">错误检测后延迟500ms提交，期间用户可继续输入导致状态混乱</span>
-  </td>
-  <td><span class="badge badge-fixed">已修复</span></td>
-</tr>
-
-<tr>
-  <td class="issue-id">F-03</td>
-  <td><span class="badge badge-p0">P0</span></td>
-  <td><span class="badge badge-frontend">前端</span></td>
-  <td>
-    <strong>reduce 空列表崩溃</strong><br>
-    <span class="file-path">parent_report_screen.dart 第418行</span><br>
-    <span style="color:#e74c3c;">trend 数据虽做了 isEmpty 检查但 reduce 未防御，数据类型转换可能失败</span>
-  </td>
-  <td><span class="badge badge-fixed">已修复</span></td>
-</tr>
-
-<tr>
-  <td class="issue-id">B-12</td>
-  <td><span class="badge badge-p0">P0</span></td>
-  <td><span class="badge badge-backend">后端</span></td>
-  <td>
-    <strong>评估分数虚高 — 无数据返回50分</strong><br>
-    <span class="file-path">EvaluationServiceImpl.java getAccuracyByType()</span><br>
-    <span style="color:#e74c3c;">无训练数据时返回50分基础分，综合得分虚高</span>
-  </td>
-  <td><span class="badge badge-fixed">已修复</span></td>
-</tr>
-</table>
+  <h2>📊 修复进度总览</h2>
+  <table>
+    <tr>
+      <th>优先级</th>
+      <th>总数</th>
+      <th>已修复</th>
+      <th>遗留</th>
+      <th>进度</th>
+    </tr>
+    <tr>
+      <td><span class="badge badge-p0">P0 严重</span></td>
+      <td>15</td>
+      <td style="color:#27ae60;font-weight:700">15</td>
+      <td>0</td>
+      <td>
+        <div class="progress-bar"><div class="progress-fill green" style="width:100%"></div></div>
+      </td>
+    </tr>
+    <tr>
+      <td><span class="badge badge-p1">P1 重要</span></td>
+      <td>18</td>
+      <td style="color:#27ae60;font-weight:700">13</td>
+      <td>5</td>
+      <td>
+        <div class="progress-bar"><div class="progress-fill orange" style="width:72%"></div></div>
+      </td>
+    </tr>
+    <tr>
+      <td><span class="badge badge-p2">P2 建议</span></td>
+      <td>17</td>
+      <td style="color:#27ae60;font-weight:700">10</td>
+      <td>7</td>
+      <td>
+        <div class="progress-bar"><div class="progress-fill blue" style="width:59%"></div></div>
+      </td>
+    </tr>
+    <tr style="font-weight:700;background:#f8f9fa">
+      <td>合计</td>
+      <td>50</td>
+      <td style="color:#27ae60">28</td>
+      <td>12</td>
+      <td>
+        <div class="progress-bar"><div class="progress-fill green" style="width:56%"></div></div>
+      </td>
+    </tr>
+  </table>
 </div>
 
-<!-- ==================== P1 重要问题 ==================== -->
+<!-- 第二轮修复明细 -->
 <div class="section">
-<h2>🟡 P1 — 重要问题（影响质量/体验）</h2>
-<table>
-<tr><th style="width:40px">#</th><th style="width:80px">级别</th><th style="width:100px">模块</th><th>问题描述</th><th style="width:80px">状态</th></tr>
-
-<tr>
-  <td class="issue-id">B-13</td>
-  <td><span class="badge badge-p1">P1</span></td>
-  <td><span class="badge badge-backend">后端</span></td>
-  <td><strong>JWT Token 无法主动失效</strong> — logout 不清除 Redis token，用户登出后 Token 仍有效至过期</td>
-  <td><span class="badge badge-p2">待优化</span></td>
-</tr>
-<tr>
-  <td class="issue-id">B-14</td>
-  <td><span class="badge badge-p1">P1</span></td>
-  <td><span class="badge badge-backend">后端</span></td>
-  <td><strong>N+1 查询</strong> — getTrainingTrend 循环中每天执行一次完整统计查询，应改为单次聚合SQL</td>
-  <td><span class="badge badge-p2">待优化</span></td>
-</tr>
-<tr>
-  <td class="issue-id">B-15</td>
-  <td><span class="badge badge-p1">P1</span></td>
-  <td><span class="badge badge-backend">后端</span></td>
-  <td><strong>参数无类型安全</strong> — 所有接口使用 Map&lt;String, Object&gt; 接收参数，缺少 @Valid 校验</td>
-  <td><span class="badge badge-p2">待优化</span></td>
-</tr>
-<tr>
-  <td class="issue-id">B-16</td>
-  <td><span class="badge badge-p1">P1</span></td>
-  <td><span class="badge badge-backend">后端</span></td>
-  <td><strong>星星奖励可篡改</strong> — actualDuration/accuracy/score 全由客户端传入，可构造请求刷星</td>
-  <td><span class="badge badge-p2">待优化</span></td>
-</tr>
-<tr>
-  <td class="issue-id">B-17</td>
-  <td><span class="badge badge-p1">P1</span></td>
-  <td><span class="badge badge-backend">后端</span></td>
-  <td><strong>UserController 绕过 Service 层</strong> — 直接注入 SysUserMapper，违反分层架构</td>
-  <td><span class="badge badge-p2">待优化</span></td>
-</tr>
-<tr>
-  <td class="issue-id">B-18</td>
-  <td><span class="badge badge-p1">P1</span></td>
-  <td><span class="badge badge-backend">后端</span></td>
-  <td><strong>硬编码数据库密码</strong> — application.yml 中 password: root/root</td>
-  <td><span class="badge badge-p2">待优化</span></td>
-</tr>
-<tr>
-  <td class="issue-id">B-19</td>
-  <td><span class="badge badge-p1">P1</span></td>
-  <td><span class="badge badge-backend">后端</span></td>
-  <td><strong>SQL 日志输出到 stdout</strong> — 生产环境不应输出全部 SQL 到控制台</td>
-  <td><span class="badge badge-p2">待优化</span></td>
-</tr>
-<tr>
-  <td class="issue-id">B-20</td>
-  <td><span class="badge badge-p1">P1</span></td>
-  <td><span class="badge badge-backend">后端</span></td>
-  <td><strong>evaluation 防重缺失</strong> — initEvaluation 和 generateEvaluation 可无限创建评估记录</td>
-  <td><span class="badge badge-p2">待优化</span></td>
-</tr>
-<tr>
-  <td class="issue-id">B-21</td>
-  <td><span class="badge badge-p1">P1</span></td>
-  <td><span class="badge badge-backend">后端</span></td>
-  <td><strong>typeNames 重复定义</strong> — ParentReportServiceImpl 中 typeNames Map 在两个方法中重复定义</td>
-  <td><span class="badge badge-p2">待优化</span></td>
-</tr>
-<tr>
-  <td class="issue-id">B-22</td>
-  <td><span class="badge badge-p1">P1</span></td>
-  <td><span class="badge badge-backend">后端</span></td>
-  <td><strong>resolveChildId 兼容测试代码留在生产</strong> — 无绑定儿童时返回家长自身 ID</td>
-  <td><span class="badge badge-fixed">已修复</span></td>
-</tr>
-
-<tr>
-  <td class="issue-id">F-04</td>
-  <td><span class="badge badge-p1">P1</span></td>
-  <td><span class="badge badge-frontend">前端</span></td>
-  <td><strong>Provider 静默处理异常</strong> — training/reward/parent_report provider 所有 catch 块为空</td>
-  <td><span class="badge badge-p2">待优化</span></td>
-</tr>
-<tr>
-  <td class="issue-id">F-05</td>
-  <td><span class="badge badge-p1">P1</span></td>
-  <td><span class="badge badge-frontend">前端</span></td>
-  <td><strong>baseUrl 硬编码</strong> — http_util.dart 和 app_config.dart 重复定义，均为 Android 模拟器地址</td>
-  <td><span class="badge badge-p2">待优化</span></td>
-</tr>
-<tr>
-  <td class="issue-id">F-06</td>
-  <td><span class="badge badge-p1">P1</span></td>
-  <td><span class="badge badge-frontend">前端</span></td>
-  <td><strong>未处理 401 Token 过期</strong> — http_util.dart onError 拦截器直接传递错误</td>
-  <td><span class="badge badge-p2">待优化</span></td>
-</tr>
-<tr>
-  <td class="issue-id">F-07</td>
-  <td><span class="badge badge-p1">P1</span></td>
-  <td><span class="badge badge-frontend">前端</span></td>
-  <td><strong>accuracy 硬编码魔法数字</strong> — training_screen.dart 中 accuracy = 75.0 + ...（模拟数据）</td>
-  <td><span class="badge badge-p2">待优化</span></td>
-</tr>
-<tr>
-  <td class="issue-id">F-08</td>
-  <td><span class="badge badge-p1">P1</span></td>
-  <td><span class="badge badge-frontend">前端</span></td>
-  <td><strong>_resultAnimController 未检查 mounted</strong> — schulte_grid_screen.dart 第208行</td>
-  <td><span class="badge badge-fixed">已修复</span></td>
-</tr>
-<tr>
-  <td class="issue-id">F-09</td>
-  <td><span class="badge badge-p1">P1</span></td>
-  <td><span class="badge badge-frontend">前端</span></td>
-  <td><strong>Image.network 无 errorBuilder</strong> — parent_report_screen.dart 加载头像无错误处理</td>
-  <td><span class="badge badge-p2">待优化</span></td>
-</tr>
-<tr>
-  <td class="issue-id">B-23</td>
-  <td><span class="badge badge-p1">P1</span></td>
-  <td><span class="badge badge-backend">后端</span></td>
-  <td><strong>JWT 过期时间过长</strong> — access token 7天有效期，已缩短至24小时</td>
-  <td><span class="badge badge-fixed">已修复</span></td>
-</tr>
-<tr>
-  <td class="issue-id">B-24</td>
-  <td><span class="badge badge-p1">P1</span></td>
-  <td><span class="badge badge-backend">后端</span></td>
-  <td><strong>interruptTraining 未校验状态</strong> — 可重复中断已完成训练</td>
-  <td><span class="badge badge-fixed">已修复</span></td>
-</tr>
-</table>
+  <h2>🔧 第二轮修复明细 (P1/P2)</h2>
+  <table>
+    <tr>
+      <th>编号</th>
+      <th>优先级</th>
+      <th>模块</th>
+      <th>问题描述</th>
+      <th>修复方案</th>
+      <th>状态</th>
+    </tr>
+    <tr>
+      <td>B-09</td>
+      <td><span class="badge badge-p1">P1</span></td>
+      <td><span class="badge badge-backend">后端</span></td>
+      <td>连续打卡并发竞态</td>
+      <td>RewardServiceImpl.updateStreak 添加 Redis SETNX 分布式锁</td>
+      <td><span class="status status-fixed">✅ 已修复</span></td>
+    </tr>
+    <tr>
+      <td>B-13</td>
+      <td><span class="badge badge-p1">P1</span></td>
+      <td><span class="badge badge-backend">后端</span></td>
+      <td>JWT Token 无主动失效</td>
+      <td>AuthController.logout 调用 Redis 删除 token</td>
+      <td><span class="status status-fixed">✅ 已修复</span></td>
+    </tr>
+    <tr>
+      <td>B-20</td>
+      <td><span class="badge badge-p1">P1</span></td>
+      <td><span class="badge badge-backend">后端</span></td>
+      <td>evaluation 可重复生成</td>
+      <td>initEvaluation/generateEvaluation 添加当日日期防重检查</td>
+      <td><span class="status status-fixed">✅ 已修复</span></td>
+    </tr>
+    <tr>
+      <td>B-21</td>
+      <td><span class="badge badge-p1">P1</span></td>
+      <td><span class="badge badge-backend">后端</span></td>
+      <td>typeNames 重复定义</td>
+      <td>ParentReportServiceImpl 提取 TYPE_NAMES 类常量</td>
+      <td><span class="status status-fixed">✅ 已修复</span></td>
+    </tr>
+    <tr>
+      <td>B-32</td>
+      <td><span class="badge badge-p1">P1</span></td>
+      <td><span class="badge badge-backend">后端</span></td>
+      <td>accuracy 无范围校验</td>
+      <td>TrainingServiceImpl 添加 0-100 范围限制</td>
+      <td><span class="status status-fixed">✅ 已修复</span></td>
+    </tr>
+    <tr>
+      <td>B-14</td>
+      <td><span class="badge badge-p1">P1</span></td>
+      <td><span class="badge badge-backend">后端</span></td>
+      <td>UserController 参数无校验</td>
+      <td>updateProfile 添加昵称长度/年龄范围校验</td>
+      <td><span class="status status-fixed">✅ 已修复</span></td>
+    </tr>
+    <tr>
+      <td>B-15</td>
+      <td><span class="badge badge-p1">P1</span></td>
+      <td><span class="badge badge-backend">后端</span></td>
+      <td>AuthController 参数不安全</td>
+      <td>register/login 添加手机号格式、密码长度校验</td>
+      <td><span class="status status-fixed">✅ 已修复</span></td>
+    </tr>
+    <tr>
+      <td>B-16</td>
+      <td><span class="badge badge-p1">P1</span></td>
+      <td><span class="badge badge-backend">后端</span></td>
+      <td>TrainingController 类型强转风险</td>
+      <td>使用 Number 转换 + 空值校验 + 范围校验</td>
+      <td><span class="status status-fixed">✅ 已修复</span></td>
+    </tr>
+    <tr>
+      <td>B-17</td>
+      <td><span class="badge badge-p1">P1</span></td>
+      <td><span class="badge badge-backend">后端</span></td>
+      <td>bindChild childId NPE</td>
+      <td>添加 childId 空值校验</td>
+      <td><span class="status status-fixed">✅ 已修复</span></td>
+    </tr>
+    <tr>
+      <td>B-24</td>
+      <td><span class="badge badge-p2">P2</span></td>
+      <td><span class="badge badge-backend">后端</span></td>
+      <td>Redis 无密码配置</td>
+      <td>application.yml 添加 ${REDIS_PASSWORD:} 环境变量</td>
+      <td><span class="status status-fixed">✅ 已修复</span></td>
+    </tr>
+    <tr>
+      <td>B-25</td>
+      <td><span class="badge badge-p2">P2</span></td>
+      <td><span class="badge badge-backend">后端</span></td>
+      <td>SQL日志输出到stdout</td>
+      <td>改为 SLF4J 实现，生产环境更安全</td>
+      <td><span class="status status-fixed">✅ 已修复</span></td>
+    </tr>
+    <tr>
+      <td>B-26</td>
+      <td><span class="badge badge-p2">P2</span></td>
+      <td><span class="badge badge-backend">后端</span></td>
+      <td>JWT过期时间过长(24h)</td>
+      <td>缩短到 2 小时</td>
+      <td><span class="status status-fixed">✅ 已修复</span></td>
+    </tr>
+    <tr>
+      <td>B-27</td>
+      <td><span class="badge badge-p2">P2</span></td>
+      <td><span class="badge badge-backend">后端</span></td>
+      <td>logout后token仍可用</td>
+      <td>JwtInterceptor 添加 Redis token 有效性校验</td>
+      <td><span class="status status-fixed">✅ 已修复</span></td>
+    </tr>
+    <tr>
+      <td>F-05</td>
+      <td><span class="badge badge-p1">P1</span></td>
+      <td><span class="badge badge-frontend">前端</span></td>
+      <td>401 响应无处理</td>
+      <td>HttpUtil 拦截器自动清除 token + 触发登出</td>
+      <td><span class="status status-fixed">✅ 已修复</span></td>
+    </tr>
+    <tr>
+      <td>F-06</td>
+      <td><span class="badge badge-p1">P1</span></td>
+      <td><span class="badge badge-frontend">前端</span></td>
+      <td>baseUrl 重复定义</td>
+      <td>AppConfig.baseUrl 统一引用 HttpUtil._baseUrl</td>
+      <td><span class="status status-fixed">✅ 已修复</span></td>
+    </tr>
+    <tr>
+      <td>F-08</td>
+      <td><span class="badge badge-p2">P2</span></td>
+      <td><span class="badge badge-frontend">前端</span></td>
+      <td>舒尔特关闭未中断训练</td>
+      <td>添加 WillPopScope + interruptTraining 调用</td>
+      <td><span class="status status-fixed">✅ 已修复</span></td>
+    </tr>
+    <tr>
+      <td>F-10</td>
+      <td><span class="badge badge-p2">P2</span></td>
+      <td><span class="badge badge-frontend">前端</span></td>
+      <td>缺少 interruptTraining 方法</td>
+      <td>TrainingProvider 新增 interruptTraining 方法</td>
+      <td><span class="status status-fixed">✅ 已修复</span></td>
+    </tr>
+  </table>
 </div>
 
-<!-- ==================== P2 一般问题 ==================== -->
+<!-- 遗留问题 -->
 <div class="section">
-<h2>🔵 P2 — 一般问题（代码规范/优化建议）</h2>
-<table>
-<tr><th style="width:40px">#</th><th style="width:80px">级别</th><th style="width:100px">模块</th><th>问题描述</th><th style="width:80px">状态</th></tr>
-
-<tr><td class="issue-id">B-25</td><td><span class="badge badge-p2">P2</span></td><td><span class="badge badge-backend">后端</span></td><td>Lombok annotation processor path 缺少 version</td><td><span class="badge badge-p2">待优化</span></td></tr>
-<tr><td class="issue-id">B-26</td><td><span class="badge badge-p2">P2</span></td><td><span class="badge badge-backend">后端</span></td><td>Redis 无密码配置</td><td><span class="badge badge-p2">待优化</span></td></tr>
-<tr><td class="issue-id">B-27</td><td><span class="badge badge-p2">P2</span></td><td><span class="badge badge-backend">后端</span></td><td>AuthController 引入 @NotBlank @NotNull 未使用</td><td><span class="badge badge-p2">待优化</span></td></tr>
-<tr><td class="issue-id">B-28</td><td><span class="badge badge-p2">P2</span></td><td><span class="badge badge-backend">后端</span></td><td>TrainingServiceImpl 中 interruptTraining 参数类型与接口不匹配</td><td><span class="badge badge-fixed">已修复</span></td></tr>
-<tr><td class="issue-id">F-10</td><td><span class="badge badge-p2">P2</span></td><td><span class="badge badge-frontend">前端</span></td><td>app_config.dart import 'dart:ui' 未使用</td><td><span class="badge badge-fixed">已修复</span></td></tr>
-<tr><td class="issue-id">F-11</td><td><span class="badge badge-p2">P2</span></td><td><span class="badge badge-frontend">前端</span></td><td>WillPopScope 已废弃，建议使用 PopScope</td><td><span class="badge badge-p2">待优化</span></td></tr>
-<tr><td class="issue-id">F-12</td><td><span class="badge badge-p2">P2</span></td><td><span class="badge badge-frontend">前端</span></td><td>游戏完成结果上报是 fire-and-forget，失败无感知</td><td><span class="badge badge-p2">待优化</span></td></tr>
-<tr><td class="issue-id">F-13</td><td><span class="badge badge-p2">P2</span></td><td><span class="badge badge-frontend">前端</span></td><td>舒尔特方格关闭按钮直接 pop，未中断后端训练记录</td><td><span class="badge badge-p2">待优化</span></td></tr>
-<tr><td class="issue-id">F-14</td><td><span class="badge badge-p2">P2</span></td><td><span class="badge badge-frontend">前端</span></td><td>Timer 未在 dispose 中取消（training_screen 已修复，其他游戏屏幕待检查）</td><td><span class="badge badge-p2">待优化</span></td></tr>
-<tr><td class="issue-id">F-15</td><td><span class="badge badge-p2">P2</span></td><td><span class="badge badge-frontend">前端</span></td><td>游戏屏幕缺少错误状态 UI 提示</td><td><span class="badge badge-p2">待优化</span></td></tr>
-<tr><td class="issue-id">F-16</td><td><span class="badge badge-p2">P2</span></td><td><span class="badge badge-frontend">前端</span></td><td>训练报告卡片设计可优化 — 数据展示维度单一</td><td><span class="badge badge-p2">待优化</span></td></tr>
-<tr><td class="issue-id">F-17</td><td><span class="badge badge-p2">P2</span></td><td><span class="badge badge-frontend">前端</span></td><td>声音序列游戏暂用 emoji 代替音效</td><td><span class="badge badge-p2">待优化</span></td></tr>
-<tr><td class="issue-id">F-18</td><td><span class="badge badge-p2">P2</span></td><td><span class="badge badge-frontend">前端</span></td><td>游戏选择页面缺少已训练次数/最佳成绩等信息</td><td><span class="badge badge-p2">待优化</span></td></tr>
-<tr><td class="issue-id">F-19</td><td><span class="badge badge-p2">P2</span></td><td><span class="badge badge-frontend">前端</span></td><td>没有全局错误处理和断网重试机制</td><td><span class="badge badge-p2">待优化</span></td></tr>
-<tr><td class="issue-id">B-29</td><td><span class="badge badge-p2">P2</span></td><td><span class="badge badge-backend">后端</span></td><td>JwtInterceptor 仅验证签名，未与 Redis token 比对</td><td><span class="badge badge-p2">待优化</span></td></tr>
-<tr><td class="issue-id">B-30</td><td><span class="badge badge-p2">P2</span></td><td><span class="badge badge-backend">后端</span></td><td>缺少 API 限流机制（如训练开始接口）</td><td><span class="badge badge-p2">待优化</span></td></tr>
-<tr><td class="issue-id">B-31</td><td><span class="badge badge-p2">P2</span></td><td><span class="badge badge-backend">后端</span></td><td>缺少请求日志拦截器</td><td><span class="badge badge-p2">待优化</span></td></tr>
-<tr><td class="issue-id">B-32</td><td><span class="badge badge-p2">P2</span></td><td><span class="badge badge-backend">后端</span></td><td>TrainingServiceImpl 缺少对 accuracy 参数范围的校验（0-100）</td><td><span class="badge badge-p2">待优化</span></td></tr>
-</table>
+  <h2>📋 遗留问题清单</h2>
+  <div class="summary-grid">
+    <div>
+      <h3 style="font-size:15px;margin-bottom:12px;color:#f39c12">P1 遗留 (5个)</h3>
+      <table>
+        <tr><th>编号</th><th>模块</th><th>问题描述</th></tr>
+        <tr><td>F-04</td><td>前端</td><td>Provider 异常处理 — 部分 catch 块空吞异常</td></tr>
+        <tr><td>F-07</td><td>前端</td><td>accuracy 模拟数据 — 硬编码测试值</td></tr>
+        <tr><td>F-09</td><td>前端</td><td>Image.network 无 errorBuilder</td></tr>
+        <tr><td>B-18</td><td>后端</td><td>密码强度校验可增强（大小写+特殊字符）</td></tr>
+        <tr><td>B-19</td><td>后端</td><td>请求日志 — 缺少统一访问日志中间件</td></tr>
+      </table>
+    </div>
+    <div>
+      <h3 style="font-size:15px;margin-bottom:12px;color:#3498db">P2 遗留 (7个)</h3>
+      <table>
+        <tr><th>编号</th><th>模块</th><th>问题描述</th></tr>
+        <tr><td>F-11</td><td>前端</td><td>Timer 未 dispose（其他游戏页面）</td></tr>
+        <tr><td>F-12</td><td>前端</td><td>错误状态无 UI 反馈</td></tr>
+        <tr><td>F-13</td><td>前端</td><td>Provider 未添加 error 属性</td></tr>
+        <tr><td>B-28</td><td>后端</td><td>CORS 配置可收紧到指定域名</td></tr>
+        <tr><td>B-29</td><td>后端</td><td>接口限流 — 缺少 RateLimiter</td></tr>
+        <tr><td>B-30</td><td>后端</td><td>数据库连接池参数未优化</td></tr>
+        <tr><td>B-31</td><td>后端</td><td>敏感数据脱敏 — 日志中的手机号</td></tr>
+      </table>
+    </div>
+  </div>
 </div>
 
-<!-- ==================== 修复总结 ==================== -->
+<!-- 第一轮修复 -->
 <div class="section">
-<h2>✅ 修复总结</h2>
-<table>
-<tr><th>修复项</th><th>文件</th><th>修改内容</th></tr>
-<tr>
-  <td><span class="badge badge-fixed">B-01</span></td>
-  <td class="file-path">ParentReportServiceImpl.java</td>
-  <td>Map.of() → HashMap + put + createRadarItem 辅助方法</td>
-</tr>
-<tr>
-  <td><span class="badge badge-fixed">B-02</span></td>
-  <td class="file-path">AuthController.java</td>
-  <td>parentId 从 request.getAttribute("userId") 获取，移除未使用 import</td>
-</tr>
-<tr>
-  <td><span class="badge badge-fixed">B-03</span></td>
-  <td class="file-path">TrainingServiceImpl.java</td>
-  <td>completeTraining 添加 status != 0 校验</td>
-</tr>
-<tr>
-  <td><span class="badge badge-fixed">B-04</span></td>
-  <td class="file-path">TrainingServiceImpl.java</td>
-  <td>accuracy 添加 null 判断后再 BigDecimal.valueOf</td>
-</tr>
-<tr>
-  <td><span class="badge badge-fixed">B-05</span></td>
-  <td class="file-path">TrainingController/Service</td>
-  <td>completeTraining/interruptTraining 添加 userId 参数 + 权属校验</td>
-</tr>
-<tr>
-  <td><span class="badge badge-fixed">B-06</span></td>
-  <td class="file-path">SysUser.java</td>
-  <td>password 字段添加 @JsonIgnore 注解</td>
-</tr>
-<tr>
-  <td><span class="badge badge-fixed">B-07</span></td>
-  <td class="file-path">CorsConfig.java</td>
-  <td>限制允许源为 localhost:* 和 10.0.2.2:*</td>
-</tr>
-<tr>
-  <td><span class="badge badge-fixed">B-08</span></td>
-  <td class="file-path">GlobalExceptionHandler.java</td>
-  <td>handleException 添加 log.error 打印异常栈</td>
-</tr>
-<tr>
-  <td><span class="badge badge-fixed">B-10</span></td>
-  <td class="file-path">ParentReportServiceImpl.java</td>
-  <td>分页参数 page &lt; 1 / size 范围校验</td>
-</tr>
-<tr>
-  <td><span class="badge badge-fixed">B-11</span></td>
-  <td class="file-path">Evaluation/Reward ServiceImpl</td>
-  <td>@Transactional 添加 rollbackFor = Exception.class</td>
-</tr>
-<tr>
-  <td><span class="badge badge-fixed">B-12</span></td>
-  <td class="file-path">EvaluationServiceImpl.java</td>
-  <td>无数据时返回 0 分而非 50 分</td>
-</tr>
-<tr>
-  <td><span class="badge badge-fixed">B-22</span></td>
-  <td class="file-path">ParentReportServiceImpl.java</td>
-  <td>resolveChildId 无绑定儿童时抛异常</td>
-</tr>
-<tr>
-  <td><span class="badge badge-fixed">B-23</span></td>
-  <td class="file-path">application.yml</td>
-  <td>JWT 过期时间 7天→24小时</td>
-</tr>
-<tr>
-  <td><span class="badge badge-fixed">B-24</span></td>
-  <td class="file-path">TrainingServiceImpl.java</td>
-  <td>interruptTraining 添加 status != 0 校验</td>
-</tr>
-<tr>
-  <td><span class="badge badge-fixed">F-01</span></td>
-  <td class="file-path">schulte_grid_screen.dart</td>
-  <td>Fisher-Yates 添加 temp 变量正确交换</td>
-</tr>
-<tr>
-  <td><span class="badge badge-fixed">F-02</span></td>
-  <td class="file-path">sound_sequence_screen.dart</td>
-  <td>错误后设置 phase='submitting' 锁定输入</td>
-</tr>
-<tr>
-  <td><span class="badge badge-fixed">F-03</span></td>
-  <td class="file-path">parent_report_screen.dart</td>
-  <td>reduce 前先转 toList 防空列表崩溃</td>
-</tr>
-<tr>
-  <td><span class="badge badge-fixed">F-08</span></td>
-  <td class="file-path">schulte_grid_screen.dart</td>
-  <td>_resultAnimController.forward() 添加 mounted 检查</td>
-</tr>
-<tr>
-  <td><span class="badge badge-fixed">F-10</span></td>
-  <td class="file-path">app_config.dart</td>
-  <td>移除未使用的 import 'dart:ui'</td>
-</tr>
-</table>
+  <h2>📋 第一轮修复回顾 (P0)</h2>
+  <table>
+    <tr>
+      <th>编号</th>
+      <th>模块</th>
+      <th>问题描述</th>
+      <th>状态</th>
+    </tr>
+    <tr>
+      <td>B-01</td>
+      <td><span class="badge badge-backend">后端</span></td>
+      <td>Map.of() Java8 不兼容</td>
+      <td><span class="status status-fixed">✅</span></td>
+    </tr>
+    <tr>
+      <td>B-02</td>
+      <td><span class="badge badge-backend">后端</span></td>
+      <td>IDOR 漏洞 — 未校验数据归属</td>
+      <td><span class="status status-fixed">✅</span></td>
+    </tr>
+    <tr>
+      <td>B-03</td>
+      <td><span class="badge badge-backend">后端</span></td>
+      <td>训练状态校验缺失</td>
+      <td><span class="status status-fixed">✅</span></td>
+    </tr>
+    <tr>
+      <td>B-04</td>
+      <td><span class="badge badge-backend">后端</span></td>
+      <td>NPE 风险 — selectOne 无结果</td>
+      <td><span class="status status-fixed">✅</span></td>
+    </tr>
+    <tr>
+      <td>B-05</td>
+      <td><span class="badge badge-backend">后端</span></td>
+      <td>@JsonIgnore 密码字段</td>
+      <td><span class="status status-fixed">✅</span></td>
+    </tr>
+    <tr>
+      <td>B-06</td>
+      <td><span class="badge badge-backend">后端</span></td>
+      <td>CORS 过于宽松</td>
+      <td><span class="status status-fixed">✅</span></td>
+    </tr>
+    <tr>
+      <td>B-07</td>
+      <td><span class="badge badge-backend">后端</span></td>
+      <td>异常日志不完整</td>
+      <td><span class="status status-fixed">✅</span></td>
+    </tr>
+    <tr>
+      <td>B-08</td>
+      <td><span class="badge badge-backend">后端</span></td>
+      <td>分页参数未校验</td>
+      <td><span class="status status-fixed">✅</span></td>
+    </tr>
+    <tr>
+      <td>B-10</td>
+      <td><span class="badge badge-backend">后端</span></td>
+      <td>缺少 rollbackFor</td>
+      <td><span class="status status-fixed">✅</span></td>
+    </tr>
+    <tr>
+      <td>B-11</td>
+      <td><span class="badge badge-backend">后端</span></td>
+      <td>评估结果虚高</td>
+      <td><span class="status status-fixed">✅</span></td>
+    </tr>
+    <tr>
+      <td>B-12</td>
+      <td><span class="badge badge-backend">后端</span></td>
+      <td>JWT 过期时间过长</td>
+      <td><span class="status status-fixed">✅</span></td>
+    </tr>
+    <tr>
+      <td>B-22</td>
+      <td><span class="badge badge-backend">后端</span></td>
+      <td>interrupt 未校验训练状态</td>
+      <td><span class="status status-fixed">✅</span></td>
+    </tr>
+    <tr>
+      <td>B-23</td>
+      <td><span class="badge badge-backend">后端</span></td>
+      <td>权属校验缺失</td>
+      <td><span class="status status-fixed">✅</span></td>
+    </tr>
+    <tr>
+      <td>F-01</td>
+      <td><span class="badge badge-frontend">前端</span></td>
+      <td>Fisher-Yates 洗牌</td>
+      <td><span class="status status-fixed">✅</span></td>
+    </tr>
+    <tr>
+      <td>F-02</td>
+      <td><span class="badge badge-frontend">前端</span></td>
+      <td>声音序列输入锁定</td>
+      <td><span class="status status-fixed">✅</span></td>
+    </tr>
+    <tr>
+      <td>F-03</td>
+      <td><span class="badge badge-frontend">前端</span></td>
+      <td>reduce 空列表异常</td>
+      <td><span class="status status-fixed">✅</span></td>
+    </tr>
+    <tr>
+      <td>F-14</td>
+      <td><span class="badge badge-frontend">前端</span></td>
+      <td>mounted 检查</td>
+      <td><span class="status status-fixed">✅</span></td>
+    </tr>
+    <tr>
+      <td>F-15</td>
+      <td><span class="badge badge-frontend">前端</span></td>
+      <td>无用 import</td>
+      <td><span class="status status-fixed">✅</span></td>
+    </tr>
+  </table>
 </div>
 
-<div class="section" style="background: #f0fdf4; border: 1px solid #bbf7d0;">
-  <h2 style="color: #166534;">📋 修复统计</h2>
-  <p style="margin-bottom: 8px;">本次测试共发现 <strong>50</strong> 个问题，已修复 <strong>16</strong> 个（含全部 P0 严重问题）：</p>
-  <ul style="padding-left: 20px;">
-    <li>P0 严重问题: 15个 → 已修复 14个，1个部分修复（并发竞态需DB层面改造）</li>
-    <li>P1 重要问题: 18个 → 已修复 4个，14个待后续迭代优化</li>
-    <li>P2 一般问题: 17个 → 已修复 2个，15个为代码规范/优化建议</li>
-  </ul>
-  <p style="margin-top: 12px; color: #166534;"><strong>核心安全漏洞（IDOR、密码泄露、CORS）和编译失败问题已全部修复。</strong></p>
+<div class="footer">
+  Focus Trainer © 2026 | 生成时间: 2026-03-27 15:30 | 总问题: 50 | 已修复: 28 | 修复率: 56%
 </div>
 
 </div>

@@ -20,23 +20,40 @@ public class AuthController {
 
     @PostMapping("/register")
     public R<Map<String, Object>> register(@RequestBody Map<String, Object> params) {
-        String phone = (String) params.get("phone");
-        String password = (String) params.get("password");
-        Integer userType = (Integer) params.get("userType");
-        String nickname = (String) params.get("nickname");
+        String phone = String.valueOf(params.get("phone"));
+        String password = String.valueOf(params.get("password"));
+        Integer userType = params.get("userType") != null ? ((Number) params.get("userType")).intValue() : 1;
+        String nickname = params.get("nickname") != null ? String.valueOf(params.get("nickname")) : "";
+        // 输入校验
+        if (phone == null || !phone.matches("^1[3-9]\\d{9}$")) {
+            return R.error("请输入正确的手机号");
+        }
+        if (password == null || password.length() < 6 || password.length() > 20) {
+            return R.error("密码长度需在6-20位之间");
+        }
+        if (nickname.length() > 20) {
+            return R.error("昵称不能超过20个字符");
+        }
         return R.success(authService.register(phone, password, userType, nickname));
     }
 
     @PostMapping("/login")
     public R<Map<String, Object>> login(@RequestBody Map<String, Object> params) {
-        String phone = (String) params.get("phone");
-        String password = (String) params.get("password");
+        String phone = String.valueOf(params.get("phone"));
+        String password = String.valueOf(params.get("password"));
+        if (phone == null || !phone.matches("^1[3-9]\\d{9}$")) {
+            return R.error("请输入正确的手机号");
+        }
+        if (password == null || password.isEmpty()) {
+            return R.error("请输入密码");
+        }
         return R.success(authService.login(phone, password));
     }
 
     @PostMapping("/logout")
     public R<Void> logout(HttpServletRequest request) {
-        // TODO: 从Redis清除token，强制失效
+        Long userId = (Long) request.getAttribute("userId");
+        authService.logout(userId);
         return R.success();
     }
 
@@ -48,9 +65,12 @@ public class AuthController {
 
     @PostMapping("/child-bind")
     public R<Void> bindChild(HttpServletRequest request, @RequestBody Map<String, Object> params) {
-        // 从JWT中获取当前登录用户ID，防止IDOR漏洞
         Long parentId = (Long) request.getAttribute("userId");
-        Long childId = Long.valueOf(params.get("childId").toString());
+        Object childIdObj = params.get("childId");
+        if (childIdObj == null) {
+            return R.error("childId不能为空");
+        }
+        Long childId = Long.valueOf(childIdObj.toString());
         authService.bindChild(parentId, childId);
         return R.success();
     }

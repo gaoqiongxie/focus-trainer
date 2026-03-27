@@ -27,6 +27,14 @@ public class EvaluationServiceImpl implements EvaluationService {
 
     @Override
     public void initEvaluation(Long userId) {
+        // 防重：检查今天是否已有初始化记录
+        LambdaQueryWrapper<UserAbility> checkWrapper = new LambdaQueryWrapper<>();
+        checkWrapper.eq(UserAbility::getUserId, userId)
+                   .eq(UserAbility::getEvaluateDate, LocalDate.now());
+        if (abilityMapper.selectCount(checkWrapper) > 0) {
+            return; // 今天已有评估记录，不重复创建
+        }
+
         // 初始化评估记录（空值，等待训练数据填充）
         UserAbility ability = new UserAbility();
         ability.setUserId(userId);
@@ -44,6 +52,14 @@ public class EvaluationServiceImpl implements EvaluationService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public UserAbility generateEvaluation(Long userId) {
+        // 防重：检查今天是否已生成过评估
+        LambdaQueryWrapper<UserAbility> checkWrapper = new LambdaQueryWrapper<>();
+        checkWrapper.eq(UserAbility::getUserId, userId)
+                   .eq(UserAbility::getEvaluateDate, LocalDate.now());
+        if (abilityMapper.selectCount(checkWrapper) > 0) {
+            throw new BusinessException(ErrorCode.EVALUATION_IN_PROGRESS);
+        }
+
         LocalDateTime startTime = LocalDate.now().minusDays(7).atStartOfDay();
         LocalDateTime endTime = LocalDateTime.now();
 

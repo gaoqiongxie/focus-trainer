@@ -110,6 +110,11 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    public void logout(Long userId) {
+        redisTemplate.delete("token:" + userId);
+    }
+
+    @Override
     public Map<String, Object> refreshToken(String refreshToken) {
         Long userId = jwtUtil.getUserIdFromToken(refreshToken);
         SysUser user = userMapper.selectById(userId);

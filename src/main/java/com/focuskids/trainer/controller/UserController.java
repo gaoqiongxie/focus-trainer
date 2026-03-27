@@ -34,19 +34,31 @@ public class UserController {
         }
         // 只允许更新安全字段：昵称、头像、年龄、性别、年级
         if (params.containsKey("nickname")) {
-            user.setNickname((String) params.get("nickname"));
+            String nickname = String.valueOf(params.get("nickname"));
+            if (nickname.length() > 20) {
+                return R.error("昵称不能超过20个字符");
+            }
+            user.setNickname(nickname);
         }
         if (params.containsKey("avatar")) {
-            user.setAvatar((String) params.get("avatar"));
+            user.setAvatar(String.valueOf(params.get("avatar")));
         }
         if (params.containsKey("age")) {
-            user.setAge(((Number) params.get("age")).intValue());
+            int age = ((Number) params.get("age")).intValue();
+            if (age < 3 || age > 18) {
+                return R.error("年龄需在3-18岁之间");
+            }
+            user.setAge(age);
         }
         if (params.containsKey("gender")) {
             user.setGender(((Number) params.get("gender")).intValue());
         }
         if (params.containsKey("grade")) {
-            user.setGrade(((Number) params.get("grade")).intValue());
+            int grade = ((Number) params.get("grade")).intValue();
+            if (grade < 1 || grade > 12) {
+                return R.error("年级需在1-12之间");
+            }
+            user.setGrade(grade);
         }
         userMapper.updateById(user);
         return R.success();

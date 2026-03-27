@@ -94,6 +94,11 @@ public class TrainingServiceImpl implements TrainingService {
             throw new BusinessException(ErrorCode.TRAINING_ALREADY_COMPLETED);
         }
 
+        // 校验 accuracy 参数范围（0-100）
+        if (accuracy != null && (accuracy < 0 || accuracy > 100)) {
+            accuracy = Math.max(0, Math.min(100, accuracy));
+        }
+
         record.setActualDuration(actualDuration);
         record.setInterruptCount(interruptCount);
         record.setAccuracy(accuracy != null

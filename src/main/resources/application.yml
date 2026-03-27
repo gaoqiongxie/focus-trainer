@@ -10,8 +10,9 @@ spring:
     username: root
     password: root
   redis:
-    host: localhost
-    port: 6379
+    host: ${REDIS_HOST:localhost}
+    port: ${REDIS_PORT:6379}
+    password: ${REDIS_PASSWORD:}
     database: 0
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
@@ -29,12 +30,12 @@ mybatis-plus:
       logic-not-delete-value: 0
   configuration:
     map-underscore-to-camel-case: true
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
 
 # JWT配置
 jwt:
   secret: ${JWT_SECRET:FkTr2026#Sec!K3y$F0cusKidsApp}
-  expiration: 86400000  # 24小时(毫秒)
+  expiration: 7200000  # 2小时(毫秒)
   header: Authorization
   prefix: Bearer
 

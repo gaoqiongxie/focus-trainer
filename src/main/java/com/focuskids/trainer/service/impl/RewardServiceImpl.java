@@ -10,11 +10,13 @@ import com.focuskids.trainer.mapper.SysUserMapper;
 import com.focuskids.trainer.mapper.UserStreakMapper;
 import com.focuskids.trainer.service.RewardService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +25,7 @@ public class RewardServiceImpl implements RewardService {
     private final SysUserMapper userMapper;
     private final RewardRecordMapper rewardMapper;
     private final UserStreakMapper streakMapper;
+    private final StringRedisTemplate redisTemplate;
 
     private static final List<String> BADGE_NAMES = Arrays.asList(
             "初出茅庐", "坚持不懈", "训练达人", "专注之星",
@@ -95,40 +98,54 @@ public class RewardServiceImpl implements RewardService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public UserStreak updateStreak(Long userId) {
-        LocalDate today = LocalDate.now();
-
-        LambdaQueryWrapper<UserStreak> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(UserStreak::getUserId, userId);
-        UserStreak streak = streakMapper.selectOne(wrapper);
-
-        if (streak == null) {
-            streak = new UserStreak();
-            streak.setUserId(userId);
-            streak.setCurrentStreak(1);
-            streak.setMaxStreak(1);
-            streak.setLastTrainDate(today);
-            streakMapper.insert(streak);
-        } else if (streak.getLastTrainDate() == null || streak.getLastTrainDate().plusDays(1).isEqual(today)) {
-            // 连续打卡
-            streak.setCurrentStreak(streak.getCurrentStreak() + 1);
-            if (streak.getCurrentStreak() > streak.getMaxStreak()) {
-                streak.setMaxStreak(streak.getCurrentStreak());
-            }
-            streak.setLastTrainDate(today);
-            streakMapper.updateById(streak);
-        } else if (streak.getLastTrainDate().isEqual(today)) {
-            // 今天已打卡，不处理
-        } else {
-            // 中断了，重新开始
-            streak.setCurrentStreak(1);
-            streak.setLastTrainDate(today);
-            streakMapper.updateById(streak);
+        // 使用 Redis 分布式锁防止并发竞态
+        String lockKey = "streak:lock:" + userId;
+        Boolean locked = redisTemplate.opsForValue().setIfAbsent(lockKey, "1", 10, TimeUnit.SECONDS);
+        if (locked == null || !locked) {
+            // 未获取到锁，返回当前记录
+            return getStreak(userId);
         }
 
-        // 检查是否获得连续打卡徽章
-        checkStreakBadge(userId, streak.getCurrentStreak());
+        try {
+            LocalDate today = LocalDate.now();
 
-        return streak;
+            LambdaQueryWrapper<UserStreak> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(UserStreak::getUserId, userId);
+            UserStreak streak = streakMapper.selectOne(wrapper);
+
+            if (streak == null) {
+                streak = new UserStreak();
+                streak.setUserId(userId);
+                streak.setCurrentStreak(1);
+                streak.setMaxStreak(1);
+                streak.setLastTrainDate(today);
+                streakMapper.insert(streak);
+            } else if (streak.getLastTrainDate() == null || streak.getLastTrainDate().plusDays(1).isEqual(today)) {
+                // 连续打卡 — 使用数据库原子更新避免竞态
+                streakMapper.update(null, new LambdaUpdateWrapper<UserStreak>()
+                        .eq(UserStreak::getUserId, userId)
+                        .eq(UserStreak::getLastTrainDate, streak.getLastTrainDate())
+                        .setSql("current_streak = current_streak + 1, max_streak = GREATEST(max_streak, current_streak + 1), last_train_date = '" + today + "'"));
+
+                // 刷新对象
+                streak = streakMapper.selectOne(wrapper);
+            } else if (streak.getLastTrainDate().isEqual(today)) {
+                // 今天已打卡，不处理
+            } else {
+                // 中断了，重新开始
+                streakMapper.update(null, new LambdaUpdateWrapper<UserStreak>()
+                        .eq(UserStreak::getUserId, userId)
+                        .setSql("current_streak = 1, last_train_date = '" + today + "'"));
+                streak = streakMapper.selectOne(wrapper);
+            }
+
+            // 检查是否获得连续打卡徽章
+            checkStreakBadge(userId, streak.getCurrentStreak());
+
+            return streak;
+        } finally {
+            redisTemplate.delete(lockKey);
+        }
     }
 
     private void checkStreakBadge(Long userId, int streakDays) {

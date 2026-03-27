@@ -29,27 +29,48 @@ public class TrainingController {
     @PostMapping("/start")
     public R<TrainingRecord> startTraining(HttpServletRequest request, @RequestBody Map<String, Object> params) {
         Long userId = (Long) request.getAttribute("userId");
-        Integer trainingType = (Integer) params.get("trainingType");
-        Integer level = (Integer) params.get("level");
-        Integer duration = params.get("duration") != null ? (Integer) params.get("duration") : null;
+        Object typeObj = params.get("trainingType");
+        Object levelObj = params.get("level");
+        if (typeObj == null || levelObj == null) {
+            return R.error("trainingType和level不能为空");
+        }
+        Integer trainingType = ((Number) typeObj).intValue();
+        Integer level = ((Number) levelObj).intValue();
+        Integer duration = params.get("duration") != null ? ((Number) params.get("duration")).intValue() : null;
         return R.success(trainingService.startTraining(userId, trainingType, level, duration));
     }
 
     @PostMapping("/complete")
     public R<TrainingRecord> completeTraining(HttpServletRequest request, @RequestBody Map<String, Object> params) {
         Long userId = (Long) request.getAttribute("userId");
-        Long recordId = Long.valueOf(params.get("recordId").toString());
-        Integer actualDuration = (Integer) params.get("actualDuration");
-        Integer interruptCount = params.get("interruptCount") != null ? (Integer) params.get("interruptCount") : 0;
+        Object recordIdObj = params.get("recordId");
+        Object durationObj = params.get("actualDuration");
+        if (recordIdObj == null || durationObj == null) {
+            return R.error("recordId和actualDuration不能为空");
+        }
+        Long recordId = Long.valueOf(recordIdObj.toString());
+        Integer actualDuration = ((Number) durationObj).intValue();
+        Integer interruptCount = params.get("interruptCount") != null ? ((Number) params.get("interruptCount")).intValue() : 0;
         Double accuracy = params.get("accuracy") != null ? ((Number) params.get("accuracy")).doubleValue() : null;
-        Integer score = params.get("score") != null ? (Integer) params.get("score") : 0;
+        Integer score = params.get("score") != null ? ((Number) params.get("score")).intValue() : 0;
+        // 参数范围校验
+        if (actualDuration <= 0 || actualDuration > 3600) {
+            return R.error("实际训练时长不合法");
+        }
+        if (score < 0) {
+            score = 0;
+        }
         return R.success(trainingService.completeTraining(userId, recordId, actualDuration, interruptCount, accuracy, score));
     }
 
     @PostMapping("/interrupt")
     public R<Void> interruptTraining(HttpServletRequest request, @RequestBody Map<String, Object> params) {
         Long userId = (Long) request.getAttribute("userId");
-        Long recordId = Long.valueOf(params.get("recordId").toString());
+        Object recordIdObj = params.get("recordId");
+        if (recordIdObj == null) {
+            return R.error("recordId不能为空");
+        }
+        Long recordId = Long.valueOf(recordIdObj.toString());
         trainingService.interruptTraining(userId, recordId);
         return R.success();
     }

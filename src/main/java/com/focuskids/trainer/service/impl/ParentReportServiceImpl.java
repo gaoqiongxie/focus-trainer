@@ -33,6 +33,17 @@ public class ParentReportServiceImpl implements ParentReportService {
     private final TrainingRecordMapper trainingRecordMapper;
     private final UserAbilityMapper userAbilityMapper;
 
+    /** 训练类型名称映射（统一维护，避免重复定义） */
+    private static final Map<Integer, String> TYPE_NAMES = new HashMap<>();
+    static {
+        TYPE_NAMES.put(1, "专注时长");
+        TYPE_NAMES.put(2, "视觉追踪");
+        TYPE_NAMES.put(3, "听觉专注");
+        TYPE_NAMES.put(4, "记忆训练");
+        TYPE_NAMES.put(21, "数字闪现");
+        TYPE_NAMES.put(41, "卡片配对");
+    }
+
     @Override
     public Map<String, Object> getDashboard(Long parentUserId, Long childId) {
         Long targetChildId = resolveChildId(parentUserId, childId);
@@ -433,14 +444,6 @@ public class ParentReportServiceImpl implements ParentReportService {
      * 计算训练类型分布
      */
     private Map<String, Object> calcTypeDistribution(Long userId, LocalDateTime start, LocalDateTime end) {
-        Map<Integer, String> typeNames = new HashMap<>();
-        typeNames.put(1, "专注时长");
-        typeNames.put(2, "视觉追踪");
-        typeNames.put(3, "听觉专注");
-        typeNames.put(4, "记忆训练");
-        typeNames.put(21, "数字闪现");
-        typeNames.put(41, "卡片配对");
-
         LambdaQueryWrapper<TrainingRecord> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(TrainingRecord::getUserId, userId)
                .eq(TrainingRecord::getStatus, 1)
@@ -451,7 +454,7 @@ public class ParentReportServiceImpl implements ParentReportService {
 
         Map<String, Long> distribution = new LinkedHashMap<>();
         for (TrainingRecord r : records) {
-            String name = typeNames.getOrDefault(r.getTrainingType(), "其他");
+            String name = TYPE_NAMES.getOrDefault(r.getTrainingType(), "其他");
             distribution.merge(name, 1L, Long::sum);
         }
 

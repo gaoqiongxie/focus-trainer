@@ -25,6 +25,11 @@ public interface AuthService {
     void bindChild(Long parentId, Long childId);
 
     /**
+     * 用户登出
+     */
+    void logout(Long userId);
+
+    /**
      * 刷新token
      */
     Map<String, Object> refreshToken(String refreshToken);
