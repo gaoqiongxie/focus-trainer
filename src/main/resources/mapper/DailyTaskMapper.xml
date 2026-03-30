@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.focuskids.trainer.mapper.DailyTaskMapper">
+
+    <select id="selectByUserIdAndDate" resultType="com.focuskids.trainer.entity.DailyTask">
+        SELECT * FROM daily_task
+        WHERE user_id = #{userId} AND task_date = #{taskDate}
+        ORDER BY task_type ASC
+    </select>
+
+</mapper>

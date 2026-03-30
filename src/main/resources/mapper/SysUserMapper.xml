@@ -8,4 +8,8 @@
         ORDER BY create_time DESC
     </select>
 
+    <update id="addStars">
+        UPDATE sys_user SET star_count = star_count + #{count} WHERE user_id = #{userId} AND deleted = 0
+    </update>
+
 </mapper>

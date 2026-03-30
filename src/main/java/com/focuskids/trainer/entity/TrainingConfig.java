@@ -18,8 +18,11 @@ public class TrainingConfig implements Serializable {
     @TableId(type = IdType.AUTO)
     private Integer configId;
 
-    /** 训练类型(1:专注时长 2:视觉追踪 3:听觉专注 4:记忆训练) */
+    /** 训练类型(1:专注时长 2:舒尔特方格 3:听觉专注 4:卡片配对 21:数字闪现) */
     private Integer trainingType;
+
+    /** 训练大类(1:专注时长 2:视觉追踪 3:听觉专注 4:记忆训练) */
+    private Integer category;
 
     /** 训练名称 */
     private String trainingName;
@@ -41,6 +44,9 @@ public class TrainingConfig implements Serializable {
 
     /** 是否启用(0:否 1:是) */
     private Integer isActive;
+
+    /** 训练大类(1:专注时长 2:视觉追踪 3:听觉专注 4:记忆训练) */
+    private Integer category;
 
     private LocalDateTime createTime;
 
