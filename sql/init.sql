@@ -180,3 +180,25 @@ INSERT INTO training_config (training_type, training_name, level, duration, conf
 (4, '卡片配对-初级', 1, 300, '{"game":"card_match","pairs":6,"gridColumns":4,"scoreBase":100}', '6对卡片，4×3布局', 4, 1),
 (4, '卡片配对-中级', 2, 300, '{"game":"card_match","pairs":8,"gridColumns":4,"scoreBase":100}', '8对卡片，4×4布局', 4, 1),
 (4, '卡片配对-高级', 3, 300, '{"game":"card_match","pairs":10,"gridColumns":5,"scoreBase":100}', '10对卡片，5×4布局', 4, 1);
+
+-- ----------------------------
+-- 8. 每日任务表
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS daily_task (
+    task_id         BIGINT       NOT NULL AUTO_INCREMENT COMMENT '任务ID',
+    user_id         BIGINT       NOT NULL               COMMENT '用户ID',
+    task_date       DATE         NOT NULL               COMMENT '任务日期',
+    task_type       TINYINT      NOT NULL               COMMENT '任务类型(1:完成训练 2:正确率达标 3:连续打卡 4:完成多种类型)',
+    title           VARCHAR(50)  NOT NULL               COMMENT '任务标题',
+    description     VARCHAR(255)                        COMMENT '任务描述',
+    target_value    INT          NOT NULL DEFAULT 0     COMMENT '目标值',
+    progress_value  INT          NOT NULL DEFAULT 0     COMMENT '当前进度值',
+    star_reward     INT          NOT NULL DEFAULT 0     COMMENT '奖励星星数',
+    status          TINYINT      NOT NULL DEFAULT 0     COMMENT '任务状态(0:未完成 1:已完成 2:已领取奖励)',
+    complete_time   DATETIME                            COMMENT '完成时间',
+    claim_time      DATETIME                            COMMENT '领取时间',
+    create_time     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    PRIMARY KEY (task_id),
+    UNIQUE KEY uk_user_date_type (user_id, task_date, task_type),
+    KEY idx_user_date (user_id, task_date)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='每日任务表';
