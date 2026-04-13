@@ -8,6 +8,7 @@ import com.focuskids.trainer.entity.TrainingConfig;
 import com.focuskids.trainer.entity.TrainingRecord;
 import com.focuskids.trainer.mapper.TrainingConfigMapper;
 import com.focuskids.trainer.mapper.TrainingRecordMapper;
+import com.focuskids.trainer.service.BadgeService;
 import com.focuskids.trainer.service.RewardService;
 import com.focuskids.trainer.service.TrainingService;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,7 @@ public class TrainingServiceImpl implements TrainingService {
     private final TrainingConfigMapper configMapper;
     private final TrainingRecordMapper recordMapper;
     private final RewardService rewardService;
+    private final BadgeService badgeService;
 
     @Override
     public List<TrainingConfig> getConfigList(Integer trainingType) {
@@ -122,6 +124,15 @@ public class TrainingServiceImpl implements TrainingService {
         // 发放星星奖励（通过注入的代理对象调用，确保事务生效）
         if (starReward > 0) {
             rewardService.addStars(record.getUserId(), starReward, 1, recordId);
+        }
+
+        // 检查并解锁徽章（异步通知，不影响训练流程）
+        try {
+            badgeService.checkAndUnlockAfterTraining(record.getUserId(), recordId);
+        } catch (Exception e) {
+            // 徽章解锁失败不影响训练完成
+            log.warn("[徽章检查] 解锁失败 userId={}, recordId={}, err={}",
+                     record.getUserId(), recordId, e.getMessage());
         }
 
         return record;

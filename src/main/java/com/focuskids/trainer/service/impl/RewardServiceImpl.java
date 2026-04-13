@@ -8,6 +8,7 @@ import com.focuskids.trainer.entity.UserStreak;
 import com.focuskids.trainer.mapper.RewardRecordMapper;
 import com.focuskids.trainer.mapper.SysUserMapper;
 import com.focuskids.trainer.mapper.UserStreakMapper;
+import com.focuskids.trainer.service.BadgeService;
 import com.focuskids.trainer.service.RewardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -26,12 +27,7 @@ public class RewardServiceImpl implements RewardService {
     private final RewardRecordMapper rewardMapper;
     private final UserStreakMapper streakMapper;
     private final StringRedisTemplate redisTemplate;
-
-    private static final List<String> BADGE_NAMES = Arrays.asList(
-            "初出茅庐", "坚持不懈", "训练达人", "专注之星",
-            "视觉猎手", "听觉大师", "记忆高手", "连续7天",
-            "连续14天", "连续30天", "满分通关", "百星少年"
-    );
+    private final BadgeService badgeService;
 
     @Override
     public int getStarCount(Long userId) {
@@ -58,27 +54,8 @@ public class RewardServiceImpl implements RewardService {
 
     @Override
     public List<Map<String, Object>> getBadges(Long userId) {
-        LambdaQueryWrapper<RewardRecord> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(RewardRecord::getUserId, userId)
-               .eq(RewardRecord::getRewardType, 2)
-               .orderByDesc(RewardRecord::getCreateTime);
-
-        List<RewardRecord> records = rewardMapper.selectList(wrapper);
-        Set<String> earnedBadgeNames = new HashSet<>();
-        for (RewardRecord r : records) {
-            earnedBadgeNames.add(r.getRewardName());
-        }
-
-        // 构建徽章列表（含已获得和未获得）
-        List<Map<String, Object>> badges = new ArrayList<>();
-        for (int i = 0; i < BADGE_NAMES.size(); i++) {
-            Map<String, Object> badge = new HashMap<>();
-            badge.put("id", i + 1);
-            badge.put("name", BADGE_NAMES.get(i));
-            badge.put("earned", earnedBadgeNames.contains(BADGE_NAMES.get(i)));
-            badges.add(badge);
-        }
-        return badges;
+        // 委托给 BadgeService 返回完整徽章数据
+        return badgeService.getUserBadges(userId);
     }
 
     @Override
@@ -149,19 +126,11 @@ public class RewardServiceImpl implements RewardService {
     }
 
     private void checkStreakBadge(Long userId, int streakDays) {
-        Map<Integer, String> badgeMap = new HashMap<>();
-        badgeMap.put(7, "连续7天");
-        badgeMap.put(14, "连续14天");
-        badgeMap.put(30, "连续30天");
-
-        if (badgeMap.containsKey(streakDays)) {
-            RewardRecord record = new RewardRecord();
-            record.setUserId(userId);
-            record.setRewardType(2);
-            record.setRewardValue(streakDays);
-            record.setRewardName(badgeMap.get(streakDays));
-            record.setSourceType(2);
-            rewardMapper.insert(record);
+        // 委托给 BadgeService 统一处理打卡徽章解锁
+        try {
+            badgeService.checkAndUnlockAfterStreak(userId, streakDays);
+        } catch (Exception e) {
+            // 打卡徽章解锁失败不影响打卡流程
         }
     }
 }

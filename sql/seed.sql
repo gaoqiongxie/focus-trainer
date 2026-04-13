@@ -280,7 +280,27 @@ INSERT INTO notification (user_id, type, title, content, is_read, create_time) V
 (2, 1, '周末训练提醒', '周末来啦！小明可以利用周末时间多做几次训练，每天坚持效果更好哦～', 1, DATE_SUB(CURDATE(), INTERVAL 4 DAY) + INTERVAL 9 HOUR);
 
 -- ----------------------------
--- 7. 今日每日任务（4个，默认状态）
+-- 7. 徽章数据（预置用户已解锁的徽章）
+-- 儿童用户(user_id=2)数据：
+--   累计训练: ~78次 → first_train(1), train_10(2)
+--   连续打卡: 15天   → streak_3(5), streak_7(6), streak_14(7)
+--   累计星星: ~370   → stars_50(11), stars_100(12)
+-- 注意：运行前需确保 badge 表已创建（先执行 badge.sql）
+-- ----------------------------
+INSERT INTO user_badge (user_id, badge_id, earned_at, source_type, source_id) VALUES
+-- 训练类徽章（source_type=1，source_id指向任意训练记录）
+(2, 1, '2026-03-10 16:35:00', 1, 1),   -- 初出茅庐：第1次训练
+(2, 2, '2026-03-20 16:03:00', 1, 30),  -- 训练达人：第10次训练
+-- 打卡类徽章（source_type=2，无source_id）
+(2, 5, '2026-03-13 18:00:00', 2, NULL),  -- 坚持之星：第3天
+(2, 6, '2026-03-17 18:00:00', 2, NULL),  -- 连续7天
+(2, 7, '2026-03-24 18:00:00', 2, NULL),  -- 连续14天
+-- 星星类徽章（source_type=4=系统）
+(2, 11, '2026-03-25 20:00:00', 4, NULL),  -- 小试牛刀：50星
+(2, 12, '2026-04-05 20:00:00', 4, NULL);  -- 百星少年：100星
+
+-- ----------------------------
+-- 8. 今日每日任务（4个，默认状态）
 -- 基于昨天（最后训练日期）的任务快照
 -- ----------------------------
 INSERT INTO daily_task (user_id, task_date, task_type, title, description, target_value, progress_value, star_reward, status, create_time) VALUES
