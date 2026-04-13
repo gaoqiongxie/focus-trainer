@@ -8,17 +8,21 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 评估控制器
  */
 @RestController
-@RequestMapping("/evaluation")
+@RequestMapping("/api/evaluation")
 @RequiredArgsConstructor
 public class EvaluationController {
 
     private final EvaluationService evaluationService;
 
+    /**
+     * 初始化评估
+     */
     @PostMapping("/initialize")
     public R<Void> initEvaluation(HttpServletRequest request) {
         Long userId = (Long) request.getAttribute("userId");
@@ -26,22 +30,49 @@ public class EvaluationController {
         return R.success();
     }
 
+    /**
+     * 生成/更新评估结果
+     */
     @PostMapping("/submit")
     public R<UserAbility> submitEvaluation(HttpServletRequest request) {
         Long userId = (Long) request.getAttribute("userId");
         return R.success(evaluationService.generateEvaluation(userId));
     }
 
+    /**
+     * 获取最新评估结果
+     */
     @GetMapping("/result")
     public R<UserAbility> getResult(HttpServletRequest request) {
         Long userId = (Long) request.getAttribute("userId");
         return R.success(evaluationService.getLatestEvaluation(userId));
     }
 
+    /**
+     * 获取评估历史
+     */
     @GetMapping("/history")
     public R<List<UserAbility>> getHistory(HttpServletRequest request,
                                             @RequestParam(defaultValue = "10") int limit) {
         Long userId = (Long) request.getAttribute("userId");
         return R.success(evaluationService.getEvaluationHistory(userId, limit));
+    }
+
+    /**
+     * 获取能力引导推荐（基于最新评估，推荐薄弱项训练）
+     * 返回格式: { enabled: bool, ability: UserAbility|null, recommendations: [...] }
+     */
+    @GetMapping("/guide")
+    public R<Map<String, Object>> getGuide(HttpServletRequest request) {
+        Long userId = (Long) request.getAttribute("userId");
+        UserAbility ability = evaluationService.getLatestEvaluation(userId);
+        List<Map<String, Object>> recommendations = evaluationService.getRecommendations(ability);
+        boolean needsEvaluation = ability == null;
+        return R.success(Map.of(
+                "needsEvaluation", needsEvaluation,
+                "ability", ability != null ? ability : new java.util.HashMap<>(),
+                "recommendations", recommendations,
+                "hasAbility", ability != null
+        ));
     }
 }

@@ -9,6 +9,7 @@ import com.focuskids.trainer.entity.TrainingRecord;
 import com.focuskids.trainer.mapper.TrainingConfigMapper;
 import com.focuskids.trainer.mapper.TrainingRecordMapper;
 import com.focuskids.trainer.service.BadgeService;
+import com.focuskids.trainer.service.DailyTaskService;
 import com.focuskids.trainer.service.RewardService;
 import com.focuskids.trainer.service.TrainingService;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +32,7 @@ public class TrainingServiceImpl implements TrainingService {
     private final TrainingRecordMapper recordMapper;
     private final RewardService rewardService;
     private final BadgeService badgeService;
+    private final DailyTaskService dailyTaskService;
 
     @Override
     public List<TrainingConfig> getConfigList(Integer trainingType) {
@@ -132,6 +134,14 @@ public class TrainingServiceImpl implements TrainingService {
         } catch (Exception e) {
             // 徽章解锁失败不影响训练完成
             log.warn("[徽章检查] 解锁失败 userId={}, recordId={}, err={}",
+                     record.getUserId(), recordId, e.getMessage());
+        }
+
+        // 更新每日任务进度
+        try {
+            dailyTaskService.onTrainingCompleteAfterCommit(record);
+        } catch (Exception e) {
+            log.warn("[每日任务] 更新失败 userId={}, recordId={}, err={}",
                      record.getUserId(), recordId, e.getMessage());
         }
 

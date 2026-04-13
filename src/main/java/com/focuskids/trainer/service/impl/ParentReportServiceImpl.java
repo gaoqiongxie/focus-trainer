@@ -130,42 +130,56 @@ public class ParentReportServiceImpl implements ParentReportService {
 
         Map<String, Object> result = new HashMap<>();
 
-        // 各训练类型的能力维度（基于最近训练数据计算）
-        // 1=专注时长, 2=视觉追踪, 3=听觉专注, 4=记忆训练
-        Map<String, Object> focusScore = calcTypeAbility(targetChildId, 1, weekStart, today.atTime(LocalTime.MAX));
-        Map<String, Object> visualScore = calcTypeAbility(targetChildId, 2, weekStart, today.atTime(LocalTime.MAX));
-        Map<String, Object> auditoryScore = calcTypeAbility(targetChildId, 3, weekStart, today.atTime(LocalTime.MAX));
-        Map<String, Object> memoryScore = calcTypeAbility(targetChildId, 4, weekStart, today.atTime(LocalTime.MAX));
+        // 优先使用 UserAbility 表的最新评估数据
+        List<UserAbility> abilityHistory = userAbilityMapper.selectHistoryByUserId(targetChildId, 1);
+        boolean useEvaluationData = !abilityHistory.isEmpty()
+                && ChronoUnit.DAYS.between(abilityHistory.get(0).getEvaluateDate(), today) <= 7;
 
-        // 雷达图数据（5个维度）
         List<Map<String, Object>> radarData = new ArrayList<>();
-        radarData.add(createRadarItem("专注时长", parseScore(focusScore.get("avgAccuracy"))));
-        radarData.add(createRadarItem("视觉追踪", parseScore(visualScore.get("avgAccuracy"))));
-        radarData.add(createRadarItem("听觉专注", parseScore(auditoryScore.get("avgAccuracy"))));
-        radarData.add(createRadarItem("工作记忆", parseScore(memoryScore.get("avgAccuracy"))));
 
-        // 抑制控制 = 1 - 中断率
-        double interruptRate = calcInterruptRate(targetChildId, weekStart, today.atTime(LocalTime.MAX));
-        double inhibitoryScore = Math.max(0, (1 - interruptRate) * 100);
-        radarData.add(createRadarItem("抑制控制", Math.round(inhibitoryScore)));
+        if (useEvaluationData) {
+            UserAbility ua = abilityHistory.get(0);
+            radarData.add(createRadarItem("专注时长", ua.getAttentionDuration() == null ? 0 : ua.getAttentionDuration().doubleValue()));
+            radarData.add(createRadarItem("视觉注意力", ua.getVisualAttention() == null ? 0 : ua.getVisualAttention().doubleValue()));
+            radarData.add(createRadarItem("听觉注意力", ua.getAuditoryAttention() == null ? 0 : ua.getAuditoryAttention().doubleValue()));
+            radarData.add(createRadarItem("工作记忆", ua.getWorkingMemory() == null ? 0 : ua.getWorkingMemory().doubleValue()));
+            radarData.add(createRadarItem("抑制控制", ua.getInhibitoryControl() == null ? 0 : ua.getInhibitoryControl().doubleValue()));
+            result.put("totalScore", ua.getTotalScore() == null ? 0 : ua.getTotalScore().doubleValue());
+            result.put("level", ua.getAbilityLevel());
+            result.put("fromEvaluation", true);
+        } else {
+            // 回退：基于近7天训练数据计算
+            Map<String, Object> focusScore = calcTypeAbility(targetChildId, 1, weekStart, today.atTime(LocalTime.MAX));
+            Map<String, Object> visualScore = calcTypeAbility(targetChildId, 2, weekStart, today.atTime(LocalTime.MAX));
+            Map<String, Object> auditoryScore = calcTypeAbility(targetChildId, 3, weekStart, today.atTime(LocalTime.MAX));
+            Map<String, Object> memoryScore = calcTypeAbility(targetChildId, 4, weekStart, today.atTime(LocalTime.MAX));
+
+            radarData.add(createRadarItem("专注时长", parseScore(focusScore.get("avgAccuracy"))));
+            radarData.add(createRadarItem("视觉注意力", parseScore(visualScore.get("avgAccuracy"))));
+            radarData.add(createRadarItem("听觉注意力", parseScore(auditoryScore.get("avgAccuracy"))));
+            radarData.add(createRadarItem("工作记忆", parseScore(memoryScore.get("avgAccuracy"))));
+
+            double interruptRate = calcInterruptRate(targetChildId, weekStart, today.atTime(LocalTime.MAX));
+            double inhibitoryScore = Math.max(0, (1 - interruptRate) * 100);
+            radarData.add(createRadarItem("抑制控制", Math.round(inhibitoryScore)));
+
+            result.put("focus", focusScore);
+            result.put("visual", visualScore);
+            result.put("auditory", auditoryScore);
+            result.put("memory", memoryScore);
+
+            double totalScore = radarData.stream()
+                    .mapToDouble(d -> ((Number) d.get("score")).doubleValue())
+                    .average()
+                    .orElse(0);
+            result.put("totalScore", Math.round(totalScore * 10) / 10.0);
+            result.put("level", calcAbilityLevel(totalScore));
+            result.put("fromEvaluation", false);
+        }
 
         result.put("radarData", radarData);
 
-        // 各类型详细数据
-        result.put("focus", focusScore);
-        result.put("visual", visualScore);
-        result.put("auditory", auditoryScore);
-        result.put("memory", memoryScore);
-
-        // 综合得分
-        double totalScore = radarData.stream()
-                .mapToDouble(d -> ((Number) d.get("score")).doubleValue())
-                .average()
-                .orElse(0);
-        result.put("totalScore", Math.round(totalScore * 10) / 10.0);
-        result.put("level", calcAbilityLevel(totalScore));
-
-        // 月度对比
+        // 月度对比（基于训练记录计算）
         Map<String, Object> monthFocus = calcTypeAbility(targetChildId, 1, monthStart, today.atTime(LocalTime.MAX));
         Map<String, Object> monthVisual = calcTypeAbility(targetChildId, 2, monthStart, today.atTime(LocalTime.MAX));
         Map<String, Object> monthAuditory = calcTypeAbility(targetChildId, 3, monthStart, today.atTime(LocalTime.MAX));
