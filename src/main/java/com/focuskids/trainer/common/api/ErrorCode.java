@@ -33,7 +33,8 @@ public enum ErrorCode {
 
     // 系统相关 9001-9999
     SYSTEM_ERROR(9001, "系统繁忙，请稍后重试"),
-    FILE_UPLOAD_ERROR(9002, "文件上传失败");
+    FILE_UPLOAD_ERROR(9002, "文件上传失败"),
+    RATE_LIMIT_EXCEEDED(9003, "请求过于频繁，请稍后再试");
 
     private final int code;
     private final String message;

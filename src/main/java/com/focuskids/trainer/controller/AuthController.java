@@ -1,5 +1,6 @@
 package com.focuskids.trainer.controller;
 
+import com.focuskids.trainer.common.annotation.RateLimit;
 import com.focuskids.trainer.common.api.R;
 import com.focuskids.trainer.service.AuthService;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ public class AuthController {
 
     private final AuthService authService;
 
+    @RateLimit(value = 10, windowSeconds = 60)
     @PostMapping("/register")
     public R<Map<String, Object>> register(@RequestBody Map<String, Object> params) {
         String phone = String.valueOf(params.get("phone"));
@@ -31,12 +33,16 @@ public class AuthController {
         if (password == null || password.length() < 6 || password.length() > 20) {
             return R.error("密码长度需在6-20位之间");
         }
+        if (!password.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).{6,20}$")) {
+            return R.error("密码需包含大小写字母和特殊字符");
+        }
         if (nickname.length() > 20) {
             return R.error("昵称不能超过20个字符");
         }
         return R.success(authService.register(phone, password, userType, nickname));
     }
 
+    @RateLimit(value = 20, windowSeconds = 60)
     @PostMapping("/login")
     public R<Map<String, Object>> login(@RequestBody Map<String, Object> params) {
         String phone = String.valueOf(params.get("phone"));

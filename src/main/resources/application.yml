@@ -9,6 +9,14 @@ spring:
     url: jdbc:mysql://localhost:3306/focus_trainer?useUnicode=true&characterEncoding=utf8mb4&serverTimezone=Asia/Shanghai&useSSL=false
     username: root
     password: root
+    # HikariCP连接池优化
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 20
+      idle-timeout: 300000
+      max-lifetime: 1800000
+      connection-timeout: 30000
+      pool-name: FocusTrainerHikariCP
   redis:
     host: ${REDIS_HOST:localhost}
     port: ${REDIS_PORT:6379}
@@ -50,3 +58,12 @@ training:
 file:
   upload-path: ./uploads/
   max-size: 10MB
+
+# CORS配置（生产环境指定具体域名，多个逗号分隔）
+cors:
+  allowed-origins: http://localhost:*,http://10.0.2.2:*
+
+# 限流配置
+rate-limit:
+  enabled: true
+  requests-per-minute: 60
