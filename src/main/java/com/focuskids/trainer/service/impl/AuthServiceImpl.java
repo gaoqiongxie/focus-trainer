@@ -96,7 +96,7 @@ public class AuthServiceImpl implements AuthService {
         // 检查家长已绑定儿童数量（最多3个）
         LambdaQueryWrapper<SysUser> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(SysUser::getParentId, parentId);
-        int bindCount = userMapper.selectCount(wrapper);
+        int bindCount = userMapper.selectCount(wrapper).intValue();
         if (bindCount >= 3) {
             throw new BusinessException(ErrorCode.CHILD_BIND_ERROR);
         }

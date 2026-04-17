@@ -1,5 +1,6 @@
 package com.focuskids.trainer.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.focuskids.trainer.common.api.BusinessException;
 import com.focuskids.trainer.common.api.ErrorCode;
 import com.focuskids.trainer.entity.TrainingRecord;
@@ -15,8 +16,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -153,5 +153,62 @@ public class EvaluationServiceImpl implements EvaluationService {
     @Override
     public List<UserAbility> getEvaluationHistory(Long userId, int limit) {
         return abilityMapper.selectHistoryByUserId(userId, limit);
+    }
+
+    @Override
+    public BigDecimal[] calculateAbilityScores(Long userId) {
+        UserAbility ability = getLatestEvaluation(userId);
+        BigDecimal[] scores = new BigDecimal[5];
+        if (ability == null) {
+            Arrays.fill(scores, BigDecimal.ZERO);
+            return scores;
+        }
+        scores[0] = ability.getAttentionDuration() != null ? ability.getAttentionDuration() : BigDecimal.ZERO;
+        scores[1] = ability.getVisualAttention() != null ? ability.getVisualAttention() : BigDecimal.ZERO;
+        scores[2] = ability.getAuditoryAttention() != null ? ability.getAuditoryAttention() : BigDecimal.ZERO;
+        scores[3] = ability.getWorkingMemory() != null ? ability.getWorkingMemory() : BigDecimal.ZERO;
+        scores[4] = ability.getInhibitoryControl() != null ? ability.getInhibitoryControl() : BigDecimal.ZERO;
+        return scores;
+    }
+
+    @Override
+    public List<Map<String, Object>> getRecommendations(UserAbility ability) {
+        List<Map<String, Object>> recommendations = new ArrayList<>();
+        if (ability == null) {
+            return recommendations;
+        }
+
+        // 5维：专注时长, 视觉注意力, 听觉注意力, 工作记忆, 抑制控制
+        String[] names = {"专注时长", "视觉注意力", "听觉注意力", "工作记忆", "抑制控制"};
+        BigDecimal[] values = {
+                ability.getAttentionDuration(),
+                ability.getVisualAttention(),
+                ability.getAuditoryAttention(),
+                ability.getWorkingMemory(),
+                ability.getInhibitoryControl()
+        };
+        int[] recommendTypes = {1, 2, 3, 4, 1};
+
+        // 找最薄弱项
+        BigDecimal minVal = null;
+        int minIdx = -1;
+        for (int i = 0; i < values.length; i++) {
+            BigDecimal v = values[i] != null ? values[i] : BigDecimal.ZERO;
+            if (minVal == null || v.compareTo(minVal) < 0) {
+                minVal = v;
+                minIdx = i;
+            }
+        }
+
+        if (minIdx >= 0) {
+            Map<String, Object> rec = new LinkedHashMap<>();
+            rec.put("dimension", names[minIdx]);
+            rec.put("score", minVal);
+            rec.put("recommendTrainingType", recommendTypes[minIdx]);
+            rec.put("reason", names[minIdx] + "能力相对薄弱，建议重点训练");
+            recommendations.add(rec);
+        }
+
+        return recommendations;
     }
 }

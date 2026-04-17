@@ -39,6 +39,6 @@ public class PrivacyController {
             return R.error("childId不能为空");
         }
         privacyService.deleteUserData(childId, parentId);
-        return R.success("用户数据已删除");
+        return R.success();
     }
 }

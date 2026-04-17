@@ -169,7 +169,7 @@ public class ParentDashboardServiceImpl implements ParentDashboardService {
             int half = accuracyTrends.size() / 2;
             double firstHalf = accuracyTrends.subList(0, Math.max(half, 1)).stream()
                     .mapToDouble(Double::doubleValue).average().orElse(0);
-            double secondHalf = accuracyTrends.subList(half).stream()
+            double secondHalf = accuracyTrends.subList(half, accuracyTrends.size()).stream()
                     .mapToDouble(Double::doubleValue).average().orElse(0);
             String trend;
             if (secondHalf - firstHalf > 5) {

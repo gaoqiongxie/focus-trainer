@@ -32,4 +32,9 @@ public interface ParentReportService {
      * 获取周报
      */
     Map<String, Object> getWeeklyReport(Long parentUserId, Long childId);
+
+    /**
+     * 解析儿童ID（childId为空时返回默认孩子）
+     */
+    Long resolveChildId(Long parentUserId, Long childId);
 }

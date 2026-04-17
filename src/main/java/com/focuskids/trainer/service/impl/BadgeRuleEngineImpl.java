@@ -137,7 +137,8 @@ public class BadgeRuleEngineImpl implements BadgeRuleEngine {
         LambdaQueryWrapper<TrainingRecord> w = new LambdaQueryWrapper<>();
         w.eq(TrainingRecord::getUserId, userId)
          .eq(TrainingRecord::getStatus, 1);
-        return (int) trainingRecordMapper.selectCount(w);
+        long count = trainingRecordMapper.selectCount(w);
+        return count > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) count;
     }
 
     private int countPerfectScore(Long userId) {
@@ -145,7 +146,8 @@ public class BadgeRuleEngineImpl implements BadgeRuleEngine {
         w.eq(TrainingRecord::getUserId, userId)
          .eq(TrainingRecord::getStatus, 1)
          .eq(TrainingRecord::getAccuracy, BigDecimal.valueOf(100));
-        return (int) trainingRecordMapper.selectCount(w);
+        long count = trainingRecordMapper.selectCount(w);
+        return count > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) count;
     }
 
     private int countAccuracy90(Long userId) {
@@ -153,7 +155,8 @@ public class BadgeRuleEngineImpl implements BadgeRuleEngine {
         w.eq(TrainingRecord::getUserId, userId)
          .eq(TrainingRecord::getStatus, 1)
          .ge(TrainingRecord::getAccuracy, BigDecimal.valueOf(90));
-        return (int) trainingRecordMapper.selectCount(w);
+        long count = trainingRecordMapper.selectCount(w);
+        return count > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) count;
     }
 
     private int getTotalStars(Long userId) {

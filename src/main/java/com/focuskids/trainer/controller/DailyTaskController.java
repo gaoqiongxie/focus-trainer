@@ -6,6 +6,7 @@ import com.focuskids.trainer.service.DailyTaskService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -33,7 +34,8 @@ public class DailyTaskController {
     @GetMapping("/date/{date}")
     public R<List<DailyTask>> getTasksByDate(@RequestHeader("X-User-Id") Long userId,
                                              @PathVariable String date) {
-        return R.success(dailyTaskService.getTasksByDate(userId, date));
+        LocalDate taskDate = LocalDate.parse(date);
+        return R.success(dailyTaskService.getTasksByDate(userId, taskDate));
     }
 
     /**

@@ -14,9 +14,12 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -226,34 +229,53 @@ public class EvaluationServiceImpl implements EvaluationService {
         List<Map<String, Object>> recommendations = new ArrayList<>();
         if (ability == null) {
             // 无评估数据，返回默认推荐
-            recommendations.add(Map.of(
-                    "dimension", "综合",
-                    "score", 0,
-                    "trainingType", 1,
-                    "trainingName", "专注时长训练",
-                    "reason", "开始你的第一次训练，系统将为你生成能力报告",
-                    "priority", 1
-            ));
+            Map<String, Object> defaultRec = new HashMap<>();
+            defaultRec.put("dimension", "综合");
+            defaultRec.put("score", 0);
+            defaultRec.put("trainingType", 1);
+            defaultRec.put("trainingName", "专注时长训练");
+            defaultRec.put("reason", "开始你的第一次训练，系统将为你生成能力报告");
+            defaultRec.put("priority", 1);
+            recommendations.add(defaultRec);
             return recommendations;
         }
 
         // 按得分从低到高排序，找出薄弱项
         List<Map.Entry<String, BigDecimal>> dimensionScores = new ArrayList<>();
-        dimensionScores.add(Map.entry("专注时长", ability.getAttentionDuration()));
-        dimensionScores.add(Map.entry("视觉注意力", ability.getVisualAttention()));
-        dimensionScores.add(Map.entry("听觉注意力", ability.getAuditoryAttention()));
-        dimensionScores.add(Map.entry("工作记忆", ability.getWorkingMemory()));
-        dimensionScores.add(Map.entry("抑制控制", ability.getInhibitoryControl()));
+        dimensionScores.add(new AbstractMap.SimpleEntry<>("专注时长", ability.getAttentionDuration()));
+        dimensionScores.add(new AbstractMap.SimpleEntry<>("视觉注意力", ability.getVisualAttention()));
+        dimensionScores.add(new AbstractMap.SimpleEntry<>("听觉注意力", ability.getAuditoryAttention()));
+        dimensionScores.add(new AbstractMap.SimpleEntry<>("工作记忆", ability.getWorkingMemory()));
+        dimensionScores.add(new AbstractMap.SimpleEntry<>("抑制控制", ability.getInhibitoryControl()));
         dimensionScores.sort(Comparator.comparing(e -> e.getValue() == null ? BigDecimal.ZERO : e.getValue()));
 
         // 映射到训练类型
-        Map<String, Map<String, Object>> dimensionToTraining = Map.of(
-                "专注时长", Map.of("trainingType", 1, "trainingName", "专注时长训练", "level", 1),
-                "视觉注意力", Map.of("trainingType", 2, "trainingName", "舒尔特方格", "level", 1),
-                "听觉注意力", Map.of("trainingType", 3, "trainingName", "声音序列", "level", 1),
-                "工作记忆", Map.of("trainingType", 4, "trainingName", "卡片配对", "level", 1),
-                "抑制控制", Map.of("trainingType", 21, "trainingName", "数字闪现", "level", 1)
-        );
+        Map<String, Map<String, Object>> dimensionToTraining = new LinkedHashMap<>();
+        Map<String, Object> map1 = new HashMap<>();
+        map1.put("trainingType", 1);
+        map1.put("trainingName", "专注时长训练");
+        map1.put("level", 1);
+        dimensionToTraining.put("专注时长", map1);
+        Map<String, Object> map2 = new HashMap<>();
+        map2.put("trainingType", 2);
+        map2.put("trainingName", "舒尔特方格");
+        map2.put("level", 1);
+        dimensionToTraining.put("视觉注意力", map2);
+        Map<String, Object> map3 = new HashMap<>();
+        map3.put("trainingType", 3);
+        map3.put("trainingName", "声音序列");
+        map3.put("level", 1);
+        dimensionToTraining.put("听觉注意力", map3);
+        Map<String, Object> map4 = new HashMap<>();
+        map4.put("trainingType", 4);
+        map4.put("trainingName", "卡片配对");
+        map4.put("level", 1);
+        dimensionToTraining.put("工作记忆", map4);
+        Map<String, Object> map5 = new HashMap<>();
+        map5.put("trainingType", 21);
+        map5.put("trainingName", "数字闪现");
+        map5.put("level", 1);
+        dimensionToTraining.put("抑制控制", map5);
 
         int priority = 1;
         for (Map.Entry<String, BigDecimal> entry : dimensionScores) {

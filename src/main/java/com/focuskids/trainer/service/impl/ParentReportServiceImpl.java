@@ -306,7 +306,7 @@ public class ParentReportServiceImpl implements ParentReportService {
      * 解析目标儿童ID
      * 如果parentUserId本身是儿童，直接返回；如果是家长且指定childId，验证绑定关系后返回
      */
-    private Long resolveChildId(Long parentUserId, Long childId) {
+    public Long resolveChildId(Long parentUserId, Long childId) {
         SysUser user = userMapper.selectById(parentUserId);
         if (user == null) {
             throw new BusinessException(ErrorCode.USER_NOT_FOUND);

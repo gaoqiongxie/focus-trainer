@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -68,11 +69,11 @@ public class EvaluationController {
         UserAbility ability = evaluationService.getLatestEvaluation(userId);
         List<Map<String, Object>> recommendations = evaluationService.getRecommendations(ability);
         boolean needsEvaluation = ability == null;
-        return R.success(Map.of(
-                "needsEvaluation", needsEvaluation,
-                "ability", ability != null ? ability : new java.util.HashMap<>(),
-                "recommendations", recommendations,
-                "hasAbility", ability != null
-        ));
+        Map<String, Object> result = new HashMap<>();
+        result.put("needsEvaluation", needsEvaluation);
+        result.put("ability", ability != null ? ability : new HashMap<>());
+        result.put("recommendations", recommendations);
+        result.put("hasAbility", ability != null);
+        return R.success(result);
     }
 }

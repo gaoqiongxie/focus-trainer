@@ -2,11 +2,34 @@ package com.focuskids.trainer.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.focuskids.trainer.common.api.BusinessException;
-import com.focuskids.trainer.common.api.ErrorCode;
-import com.focuskids.trainer.entity.*;
-import com.focuskids.trainer.mapper.*;
+import com.focuskids.trainer.entity.Badge;
+import com.focuskids.trainer.entity.DailyTask;
+import com.focuskids.trainer.entity.DataExportRecord;
+import com.focuskids.trainer.entity.Notification;
+import com.focuskids.trainer.entity.RewardRecord;
+import com.focuskids.trainer.entity.SysUser;
+import com.focuskids.trainer.entity.TrainingRecord;
+import com.focuskids.trainer.entity.UserAbility;
+import com.focuskids.trainer.entity.UserStreak;
+import com.focuskids.trainer.mapper.BadgeMapper;
+import com.focuskids.trainer.mapper.DailyTaskMapper;
+import com.focuskids.trainer.mapper.DataExportRecordMapper;
+import com.focuskids.trainer.mapper.NotificationMapper;
+import com.focuskids.trainer.mapper.RewardRecordMapper;
+import com.focuskids.trainer.mapper.SysUserMapper;
+import com.focuskids.trainer.mapper.TrainingRecordMapper;
+import com.focuskids.trainer.mapper.UserAbilityMapper;
+import com.focuskids.trainer.mapper.UserStreakMapper;
 import com.focuskids.trainer.service.ReportExportService;
-import com.lowagie.text.*;
+import com.lowagie.text.Chunk;
+import com.lowagie.text.Document;
+import com.lowagie.text.DocumentException;
+import com.lowagie.text.Element;
+import com.lowagie.text.Font;
+import com.lowagie.text.PageSize;
+import com.lowagie.text.Paragraph;
+import com.lowagie.text.Phrase;
+import com.lowagie.text.Rectangle;
 import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
@@ -16,7 +39,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.awt.*;
+import java.awt.Color;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.math.BigDecimal;
@@ -27,7 +50,14 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * 报告导出服务实现（PDF生成）
@@ -65,17 +95,17 @@ public class ReportExportServiceImpl implements ReportExportService {
         // 1. 校验用户
         SysUser user = userMapper.selectById(userId);
         if (user == null) {
-            throw new BusinessException(ErrorCode.NOT_FOUND, "用户不存在");
+            throw new BusinessException(404, "用户不存在");
         }
 
         // 2. 解析日期
         LocalDate start = LocalDate.parse(startDate);
         LocalDate end = LocalDate.parse(endDate);
         if (start.isAfter(end)) {
-            throw new BusinessException(ErrorCode.VALIDATE_FAILED, "开始日期不能晚于结束日期");
+            throw new BusinessException(400, "开始日期不能晚于结束日期");
         }
         if (start.plusYears(1).isBefore(end)) {
-            throw new BusinessException(ErrorCode.VALIDATE_FAILED, "日期范围不能超过1年");
+            throw new BusinessException(400, "日期范围不能超过1年");
         }
 
         // 3. 查询训练记录
@@ -104,7 +134,11 @@ public class ReportExportServiceImpl implements ReportExportService {
         } catch (Exception e) {
             log.error("创建报告目录失败: {}", reportDir, e);
             // fallback 到临时目录
-            reportDir = Files.createTempDirectory("focus-reports");
+            try {
+                reportDir = Files.createTempDirectory("focus-reports");
+            } catch (Exception ex) {
+                throw new BusinessException("无法创建临时目录: " + ex.getMessage());
+            }
         }
         File pdfFile = reportDir.resolve(fileName).toFile();
 
@@ -112,7 +146,7 @@ public class ReportExportServiceImpl implements ReportExportService {
             generatePdf(user, records, ability, start, end, pdfFile);
         } catch (Exception e) {
             log.error("生成PDF失败", e);
-            throw new BusinessException(ErrorCode.FAILED, "生成报告失败: " + e.getMessage());
+            throw new BusinessException("生成报告失败: " + e.getMessage());
         }
 
         // 6. 记录导出
@@ -291,13 +325,6 @@ public class ReportExportServiceImpl implements ReportExportService {
         section.setSpacingBefore(10);
         section.setSpacingAfter(6);
         document.add(section);
-
-        // 分隔线
-        PdfContentByte canvas = PdfWriter.getInstance(document, new FileOutputStream(File.createTempFile("tmp", ".pdf"))).getDirectContent();
-        // 分隔线使用普通方式
-        LineSeparator line = new LineSeparator();
-        line.setLineColor(new Color(200, 200, 200));
-        document.add(new Phrase("\n"));
     }
 
     /**

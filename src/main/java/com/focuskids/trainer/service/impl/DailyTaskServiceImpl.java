@@ -54,12 +54,10 @@ public class DailyTaskServiceImpl implements DailyTaskService {
     }
 
     @Override
-    public List<DailyTask> getTasksByDate(Long userId, String date) {
-        LocalDate taskDate = LocalDate.parse(date);
+    public List<DailyTask> getTasksByDate(Long userId, LocalDate taskDate) {
         return getOrCreateTasks(userId, taskDate);
     }
 
-    @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateTaskProgress(Long userId, Integer trainingType, Integer accuracy, Integer status) {
         LocalDate today = LocalDate.now();
@@ -201,6 +199,19 @@ public class DailyTaskServiceImpl implements DailyTaskService {
         summary.put("totalStars", totalStars);
         summary.put("tasks", tasks);
         return summary;
+    }
+
+    @Override
+    public void onTrainingCompleteAfterCommit(TrainingRecord record) {
+        if (record == null || record.getUserId() == null) {
+            return;
+        }
+        updateTaskProgress(
+                record.getUserId(),
+                record.getTrainingType(),
+                record.getAccuracy() != null ? record.getAccuracy().intValue() : null,
+                record.getStatus()
+        );
     }
 
     // ==================== 私有方法 ====================

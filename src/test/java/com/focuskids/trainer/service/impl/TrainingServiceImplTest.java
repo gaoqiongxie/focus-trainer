@@ -127,7 +127,7 @@ class TrainingServiceImplTest {
     @DisplayName("completeTraining 测试")
     class CompleteTrainingTest {
 
-        private static final Long RECORD_ID = 10L;
+        private final Long RECORD_ID = 10L;
 
         private TrainingRecord buildInProgressRecord() {
             TrainingRecord record = new TrainingRecord();
@@ -292,7 +292,7 @@ class TrainingServiceImplTest {
     @DisplayName("interruptTraining 测试")
     class InterruptTrainingTest {
 
-        private static final Long RECORD_ID = 10L;
+        private final Long RECORD_ID = 10L;
 
         private TrainingRecord buildInProgressRecord() {
             TrainingRecord record = new TrainingRecord();

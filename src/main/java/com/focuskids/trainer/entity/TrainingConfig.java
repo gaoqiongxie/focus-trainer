@@ -45,9 +45,6 @@ public class TrainingConfig implements Serializable {
     /** 是否启用(0:否 1:是) */
     private Integer isActive;
 
-    /** 训练大类(1:专注时长 2:视觉追踪 3:听觉专注 4:记忆训练) */
-    private Integer category;
-
     private LocalDateTime createTime;
 
     private LocalDateTime updateTime;
